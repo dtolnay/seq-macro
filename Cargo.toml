@@ -1,0 +1,12 @@
+[package]
+name = "seq-macro"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "Macro to repeat sequentially indexed copies of a fragment of code."
+repository = "https://github.com/dtolnay/seq-macro"
+documentation = "https://docs.rs/seq-macro"
+readme = "README.md"
+
+[lib]
+proc-macro = true
