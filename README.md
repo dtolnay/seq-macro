@@ -9,7 +9,7 @@ repetition a sequential numeric counter.
 
 ```toml
 [dependencies]
-seq-macro = "0.0"
+seq-macro = "0.1"
 ```
 
 ```rust
