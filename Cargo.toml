@@ -10,3 +10,10 @@ readme = "README.md"
 
 [lib]
 proc-macro = true
+
+[features]
+# Not public API.
+docs-rs = []
+
+[package.metadata.docs.rs]
+features = ["docs-rs"]

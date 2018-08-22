@@ -55,6 +55,8 @@
 //! }
 //! ```
 
+#![cfg_attr(feature = "docs-rs", feature(proc_macro))]
+
 extern crate proc_macro;
 
 mod parse;
