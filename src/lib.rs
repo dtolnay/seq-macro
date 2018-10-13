@@ -4,7 +4,7 @@
 //! substitute into each repetition a sequential numeric counter.
 //!
 //! ```rust
-//! #![feature(proc_macro_non_items)]
+//! #![feature(proc_macro_hygiene)]
 //!
 //! use seq_macro::seq;
 //!
