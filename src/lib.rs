@@ -3,7 +3,8 @@
 //! This crate provides a `seq!` macro to repeat a fragment of source code and
 //! substitute into each repetition a sequential numeric counter.
 //!
-//! ```rust
+#![cfg_attr(no_proc_macro_hygiene, doc = "```rust,ignore")]
+#![cfg_attr(not(no_proc_macro_hygiene), doc = "```rust")]
 //! #![feature(proc_macro_hygiene)]
 //!
 //! use seq_macro::seq;

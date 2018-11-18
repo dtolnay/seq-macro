@@ -1,7 +1,14 @@
 language: rust
 
-rust:
-  - nightly
+matrix:
+  include:
+    - rust: nightly
+    - rust: beta
+      env: RUSTDOCFLAGS='--cfg no_proc_macro_hygiene'
+    - rust: stable
+      env: RUSTDOCFLAGS='--cfg no_proc_macro_hygiene'
+    - rust: 1.30.0
+      env: RUSTDOCFLAGS='--cfg no_proc_macro_hygiene'
 
 script:
   - cargo test
