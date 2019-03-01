@@ -76,10 +76,21 @@ pub fn require_integer(iter: &mut TokenIter) -> Result<u64, SyntaxError> {
     Err(syntax(token, "expected integer"))
 }
 
-pub fn require_punct(iter: &mut TokenIter, ch: char, spacing: Spacing) -> Result<(), SyntaxError> {
+pub fn require_if_punct(iter: &mut TokenIter, ch: char) -> Result<bool, SyntaxError> {
+    let present = match iter.clone().next() {
+        Some(TokenTree::Punct(_)) => {
+            require_punct(iter, ch)?;
+            true
+        }
+        _ => false,
+    };
+    Ok(present)
+}
+
+pub fn require_punct(iter: &mut TokenIter, ch: char) -> Result<(), SyntaxError> {
     let token = next_token(iter)?;
     if let TokenTree::Punct(punct) = &token {
-        if punct.as_char() == ch && punct.spacing() == spacing {
+        if punct.as_char() == ch {
             return Ok(());
         }
     }

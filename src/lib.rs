@@ -63,7 +63,7 @@ extern crate proc_macro;
 mod parse;
 
 use parse::*;
-use proc_macro::{Delimiter, Group, Ident, Literal, Spacing, TokenStream, TokenTree};
+use proc_macro::{Delimiter, Group, Ident, Literal, TokenStream, TokenTree};
 use std::iter::{self, FromIterator};
 
 #[proc_macro]
@@ -79,10 +79,10 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
     let var = require_ident(&mut iter)?;
     require_keyword(&mut iter, "in")?;
     let begin = require_integer(&mut iter)?;
-    require_punct(&mut iter, '.', Spacing::Joint)?;
-    require_punct(&mut iter, '.', Spacing::Joint)?;
-    require_punct(&mut iter, '=', Spacing::Alone)?;
-    let end = require_integer(&mut iter)?;
+    require_punct(&mut iter, '.')?;
+    require_punct(&mut iter, '.')?;
+    let inclusive = require_if_punct(&mut iter, '=')?;
+    let end = require_integer(&mut iter)? - !inclusive as u64;
     let body = require_braces(&mut iter)?;
     require_end(&mut iter)?;
 
