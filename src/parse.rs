@@ -66,13 +66,37 @@ pub fn require_keyword(iter: &mut TokenIter, keyword: &str) -> Result<(), Syntax
 }
 
 pub fn require_integer(iter: &mut TokenIter) -> Result<u64, SyntaxError> {
-    let token = next_token(iter)?;
-    if let TokenTree::Literal(lit) = &token {
-        if let Ok(integer) = lit.to_string().parse::<u64>() {
-            return Ok(integer);
+    let mut token = next_token(iter)?;
+
+    loop {
+        match token {
+            TokenTree::Group(group) => {
+                let delimiter = group.delimiter();
+                let mut stream = group.stream().into_iter();
+                token = TokenTree::Group(group);
+                if delimiter != Delimiter::None {
+                    break;
+                }
+                let first = match stream.next() {
+                    Some(first) => first,
+                    None => break,
+                };
+                match stream.next() {
+                    Some(_) => break,
+                    None => token = first,
+                }
+            }
+            TokenTree::Literal(lit) => {
+                if let Ok(integer) = lit.to_string().parse::<u64>() {
+                    return Ok(integer);
+                }
+                token = TokenTree::Literal(lit);
+                return Err(syntax(token, "expected unsuffixed integer literal"));
+            }
+            _ => break,
         }
-        return Err(syntax(&token, "expected unsuffixed integer literal"));
     }
+
     Err(syntax(token, "expected integer"))
 }
 
