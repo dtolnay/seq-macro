@@ -1,7 +1,6 @@
 #![feature(proc_macro_hygiene)]
 
-#[macro_use]
-extern crate seq_macro;
+use seq_macro::seq;
 
 // Source of truth. Call a given macro passing nproc as argument.
 macro_rules! pass_nproc {

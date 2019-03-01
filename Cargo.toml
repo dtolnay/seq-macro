@@ -7,6 +7,7 @@ description = "Macro to repeat sequentially indexed copies of a fragment of code
 repository = "https://github.com/dtolnay/seq-macro"
 documentation = "https://docs.rs/seq-macro"
 readme = "README.md"
+edition = "2018"
 
 [lib]
 proc-macro = true

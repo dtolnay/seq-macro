@@ -3,8 +3,8 @@
 //! This crate provides a `seq!` macro to repeat a fragment of source code and
 //! substitute into each repetition a sequential numeric counter.
 //!
-#![cfg_attr(no_proc_macro_hygiene, doc = "```rust,ignore")]
-#![cfg_attr(not(no_proc_macro_hygiene), doc = "```rust")]
+#![cfg_attr(no_proc_macro_hygiene, doc = "```ignore")]
+#![cfg_attr(not(no_proc_macro_hygiene), doc = "```")]
 //! #![feature(proc_macro_hygiene)]
 //!
 //! use seq_macro::seq;
@@ -62,7 +62,7 @@ extern crate proc_macro;
 
 mod parse;
 
-use parse::*;
+use crate::parse::*;
 use proc_macro::{Delimiter, Group, Ident, Literal, TokenStream, TokenTree};
 use std::iter::{self, FromIterator};
 
