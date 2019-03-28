@@ -74,6 +74,26 @@ pub fn seq(input: TokenStream) -> TokenStream {
     }
 }
 
+#[derive(Copy, Clone)]
+struct Range {
+    begin: u64,
+    end: u64,
+    inclusive: bool,
+}
+
+impl IntoIterator for Range {
+    type Item = u64;
+    type IntoIter = Box<Iterator<Item = u64>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        if self.inclusive {
+            Box::new(self.begin..=self.end)
+        } else {
+            Box::new(self.begin..self.end)
+        }
+    }
+}
+
 fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
     let mut iter = input.into_iter();
     let var = require_ident(&mut iter)?;
@@ -86,12 +106,12 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
     let body = require_braces(&mut iter)?;
     require_end(&mut iter)?;
 
+    let range = Range { begin, end, inclusive };
+
     let mut found_repetition = false;
     let expanded = expand_repetitions(
         &var,
-        begin,
-        end,
-        inclusive,
+        range,
         body.clone(),
         &mut found_repetition,
     );
@@ -99,13 +119,13 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
         Ok(expanded)
     } else {
         // If no `#(...)*`, repeat the entire body.
-        Ok(repeat(&var, begin, end, &body))
+        Ok(repeat(&var, range, &body))
     }
 }
 
-fn repeat(var: &Ident, begin: u64, end: u64, body: &TokenStream) -> TokenStream {
+fn repeat(var: &Ident, range: Range, body: &TokenStream) -> TokenStream {
     let mut repeated = TokenStream::new();
-    for number in begin..=end {
+    for number in range {
         repeated.extend(substitute_number(&var, number, body.clone()));
     }
     repeated
@@ -183,9 +203,7 @@ fn enter_repetition(tokens: &[TokenTree]) -> Option<TokenStream> {
 
 fn expand_repetitions(
     var: &Ident,
-    begin: u64,
-    end: u64,
-    inclusive: bool,
+    range: Range,
     body: TokenStream,
     found_repetition: &mut bool,
 ) -> TokenStream {
@@ -196,7 +214,7 @@ fn expand_repetitions(
     while i < tokens.len() {
         if let TokenTree::Group(group) = &mut tokens[i] {
             let content =
-                expand_repetitions(var, begin, end, inclusive, group.stream(), found_repetition);
+                expand_repetitions(var, range, group.stream(), found_repetition);
             let original_span = group.span();
             *group = Group::new(group.delimiter(), content);
             group.set_span(original_span);
@@ -216,13 +234,6 @@ fn expand_repetitions(
         };
         *found_repetition = true;
         let mut repeated = Vec::new();
-        let inclusive_range = begin..=end;
-        let exclusive_range = begin..end;
-        let range: Box<Iterator<Item = u64>> = if inclusive {
-            Box::new(inclusive_range)
-        } else {
-            Box::new(exclusive_range)
-        };
         for number in range {
             repeated.extend(substitute_number(var, number, template.clone()));
         }
