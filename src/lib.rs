@@ -38,7 +38,7 @@
 //! - The numeric counter can be pasted onto the end of some prefix to form
 //!   sequential identifiers.
 //!
-//! ```rust
+//! ```
 //! use seq_macro::seq;
 //!
 //! seq!(N in 64..=127 {
