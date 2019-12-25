@@ -12,5 +12,8 @@ edition = "2018"
 [lib]
 proc-macro = true
 
+[badges]
+travis-ci = { repository = "dtolnay/seq-macro" }
+
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "docs_rs_workaround"]
