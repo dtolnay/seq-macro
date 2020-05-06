@@ -1,7 +1,7 @@
 `seq!`
 ======
 
-[![Build Status](https://api.travis-ci.org/dtolnay/seq-macro.svg?branch=master)](https://travis-ci.org/dtolnay/seq-macro)
+[![Build Status](https://img.shields.io/github/workflow/status/dtolnay/seq/CI/master)](https://github.com/dtolnay/seq/actions?query=branch%3Amaster)
 [![Latest Version](https://img.shields.io/crates/v/seq-macro.svg)](https://crates.io/crates/seq-macro)
 
 A `seq!` macro to repeat a fragment of source code and substitute into each
