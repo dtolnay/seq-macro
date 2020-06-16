@@ -91,7 +91,7 @@ struct Range {
 
 impl IntoIterator for Range {
     type Item = u64;
-    type IntoIter = Box<Iterator<Item = u64>>;
+    type IntoIter = Box<dyn Iterator<Item = u64>>;
 
     fn into_iter(self) -> Self::IntoIter {
         if self.inclusive {
