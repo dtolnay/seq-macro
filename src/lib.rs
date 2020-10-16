@@ -61,8 +61,6 @@
 //! }
 //! ```
 
-#![cfg_attr(docs_rs_workaround, feature(proc_macro))]
-
 extern crate proc_macro;
 
 mod parse;

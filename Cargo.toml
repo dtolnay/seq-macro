@@ -13,5 +13,4 @@ edition = "2018"
 proc-macro = true
 
 [package.metadata.docs.rs]
-rustdoc-args = ["--cfg", "docs_rs_workaround"]
 targets = ["x86_64-unknown-linux-gnu"]
