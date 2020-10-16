@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{Range, Value};
 use proc_macro::token_stream::IntoIter as TokenIter;
 use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::borrow::Borrow;
@@ -136,6 +136,24 @@ pub(crate) fn require_end(iter: &mut TokenIter) -> Result<(), SyntaxError> {
         Some(token) => Err(syntax(token, "unexpected token")),
         None => Ok(()),
     }
+}
+
+pub(crate) fn validate_range(
+    begin: Value,
+    end: Value,
+    inclusive: bool,
+) -> Result<Range, SyntaxError> {
+    if begin.suffix != "" && end.suffix != "" && begin.suffix != end.suffix {
+        return Err(SyntaxError {
+            message: format!("expected suffix `{}`", begin.suffix),
+            span: end.span,
+        });
+    }
+    Ok(Range {
+        begin,
+        end,
+        inclusive,
+    })
 }
 
 fn parse_literal(lit: &Literal) -> Option<Value> {

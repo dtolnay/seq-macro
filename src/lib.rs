@@ -120,11 +120,7 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
     let body = require_braces(&mut iter)?;
     require_end(&mut iter)?;
 
-    let range = Range {
-        begin,
-        end,
-        inclusive,
-    };
+    let range = validate_range(begin, end, inclusive)?;
 
     let mut found_repetition = false;
     let expanded = expand_repetitions(&var, &range, body.clone(), &mut found_repetition);
