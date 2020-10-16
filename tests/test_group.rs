@@ -1,5 +1,3 @@
-#![feature(proc_macro_hygiene)]
-
 use seq_macro::seq;
 
 // Source of truth. Call a given macro passing nproc as argument.
