@@ -89,7 +89,7 @@ pub(crate) fn require_value(iter: &mut TokenIter) -> Result<Value, SyntaxError> 
             }
             TokenTree::Literal(lit) => {
                 if let Ok(integer) = lit.to_string().parse::<u64>() {
-                    return Ok(Value(integer));
+                    return Ok(Value::int(integer));
                 }
                 token = TokenTree::Literal(lit);
                 return Err(syntax(token, "expected unsuffixed integer literal"));

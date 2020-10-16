@@ -83,7 +83,16 @@ struct Range {
 }
 
 #[derive(Copy, Clone)]
-struct Value(u64);
+struct Value {
+    int: u64,
+    // TODO: suffix
+}
+
+impl Value {
+    fn int(int: u64) -> Self {
+        Value { int }
+    }
+}
 
 impl IntoIterator for Range {
     type Item = Value;
@@ -91,9 +100,9 @@ impl IntoIterator for Range {
 
     fn into_iter(self) -> Self::IntoIter {
         if self.inclusive {
-            Box::new((self.begin.0..=self.end.0).map(Value))
+            Box::new((self.begin.int..=self.end.int).map(Value::int))
         } else {
-            Box::new((self.begin.0..self.end.0).map(Value))
+            Box::new((self.begin.int..self.end.int).map(Value::int))
         }
     }
 }
@@ -146,7 +155,7 @@ fn substitute_value(var: &Ident, value: Value, body: TokenStream) -> TokenStream
         };
         if replace {
             let original_span = tokens[i].span();
-            let mut literal = Literal::u64_unsuffixed(value.0);
+            let mut literal = Literal::u64_unsuffixed(value.int);
             literal.set_span(original_span);
             tokens[i] = TokenTree::Literal(literal);
             i += 1;
@@ -164,7 +173,7 @@ fn substitute_value(var: &Ident, value: Value, body: TokenStream) -> TokenStream
                 _ => None,
             };
             if let Some(prefix) = prefix {
-                let concat = format!("{}{}", prefix, value.0);
+                let concat = format!("{}{}", prefix, value.int);
                 let ident = Ident::new(&concat, prefix.span());
                 tokens.splice(i..i + 3, iter::once(TokenTree::Ident(ident)));
                 i += 1;
