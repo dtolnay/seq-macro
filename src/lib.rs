@@ -153,7 +153,7 @@ fn substitute_value(var: &Ident, value: &Value, body: TokenStream) -> TokenStrea
         };
         if replace {
             let original_span = tokens[i].span();
-            let mut literal = Literal::u64_unsuffixed(value.int);
+            let mut literal = value.literal();
             literal.set_span(original_span);
             tokens[i] = TokenTree::Literal(literal);
             i += 1;
@@ -252,4 +252,21 @@ fn expand_repetitions(
     }
 
     TokenStream::from_iter(tokens)
+}
+
+impl Value {
+    fn literal(&self) -> Literal {
+        if self.suffix.is_empty() {
+            return Literal::u64_unsuffixed(self.int);
+        }
+        let repr = format!("{}{}", self.int, self.suffix);
+        let tokens = repr.parse::<TokenStream>().unwrap();
+        let mut iter = tokens.into_iter();
+        let literal = match iter.next() {
+            Some(TokenTree::Literal(literal)) => literal,
+            _ => unreachable!(),
+        };
+        assert!(iter.next().is_none());
+        literal
+    }
 }
