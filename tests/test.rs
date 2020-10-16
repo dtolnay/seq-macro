@@ -37,41 +37,49 @@ fn test_fn() {
     assert_eq!(sum, 100 + 2 + 4 + 6);
 }
 
-#[test]
-fn test_enum() {
+pub mod test_enum {
+    use seq_macro::seq;
+
     seq!(N in 0..16 {
         #[derive(Copy, Clone, PartialEq, Debug)]
-        enum Interrupt {
+        pub enum Interrupt {
             #(
                 Irq#N,
             )*
         }
     });
 
-    let interrupt = Interrupt::Irq8;
-    assert_eq!(interrupt as u8, 8);
-    assert_eq!(interrupt, Interrupt::Irq8);
+    #[test]
+    fn test() {
+        let interrupt = Interrupt::Irq8;
+        assert_eq!(interrupt as u8, 8);
+        assert_eq!(interrupt, Interrupt::Irq8);
+    }
 }
 
-#[test]
-fn test_inclusive() {
+pub mod test_inclusive {
+    use seq_macro::seq;
+
     seq!(N in 16..=20 {
-        enum E {
+        pub enum E {
             #(
                 Variant#N,
             )*
         }
     });
 
-    let e = E::Variant16;
+    #[test]
+    fn test() {
+        let e = E::Variant16;
 
-    let desc = match e {
-        E::Variant16 => "min",
-        E::Variant17 | E::Variant18 | E::Variant19 => "in between",
-        E::Variant20 => "max",
-    };
+        let desc = match e {
+            E::Variant16 => "min",
+            E::Variant17 | E::Variant18 | E::Variant19 => "in between",
+            E::Variant20 => "max",
+        };
 
-    assert_eq!(desc, "min");
+        assert_eq!(desc, "min");
+    }
 }
 
 #[test]
@@ -99,8 +107,9 @@ fn test_array() {
     assert_eq!(PROCS[32].id, 32);
 }
 
-#[test]
-fn test_group() {
+pub mod test_group {
+    use seq_macro::seq;
+
     // Source of truth. Call a given macro passing nproc as argument.
     macro_rules! pass_nproc {
         ($mac:ident) => {
