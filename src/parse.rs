@@ -88,11 +88,10 @@ pub(crate) fn require_value(iter: &mut TokenIter) -> Result<Value, SyntaxError> 
                 }
             }
             TokenTree::Literal(lit) => {
-                if let Ok(integer) = lit.to_string().parse::<u64>() {
-                    return Ok(Value::int(integer));
-                }
-                token = TokenTree::Literal(lit);
-                return Err(syntax(token, "expected unsuffixed integer literal"));
+                return parse_literal(&lit).ok_or_else(|| {
+                    let token = TokenTree::Literal(lit);
+                    syntax(token, "expected unsuffixed integer literal")
+                });
             }
             _ => break,
         }
@@ -137,4 +136,10 @@ pub(crate) fn require_end(iter: &mut TokenIter) -> Result<(), SyntaxError> {
         Some(token) => Err(syntax(token, "unexpected token")),
         None => Ok(()),
     }
+}
+
+fn parse_literal(lit: &Literal) -> Option<Value> {
+    let repr = lit.to_string();
+    let int = repr.parse::<u64>().ok()?;
+    Some(Value::int(int))
 }
