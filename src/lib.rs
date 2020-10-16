@@ -92,16 +92,17 @@ impl IntoIterator for &Range {
     type IntoIter = Box<dyn Iterator<Item = Value>>;
 
     fn into_iter(self) -> Self::IntoIter {
+        let suffix = self.end.suffix.clone();
         if self.inclusive {
-            Box::new((self.begin.int..=self.end.int).map(|int| Value {
+            Box::new((self.begin.int..=self.end.int).map(move |int| Value {
                 int,
-                suffix: String::new(),
+                suffix: suffix.clone(),
                 span: Span::call_site(),
             }))
         } else {
-            Box::new((self.begin.int..self.end.int).map(|int| Value {
+            Box::new((self.begin.int..self.end.int).map(move |int| Value {
                 int,
-                suffix: String::new(),
+                suffix: suffix.clone(),
                 span: Span::call_site(),
             }))
         }

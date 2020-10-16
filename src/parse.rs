@@ -139,11 +139,15 @@ pub(crate) fn require_end(iter: &mut TokenIter) -> Result<(), SyntaxError> {
 }
 
 pub(crate) fn validate_range(
-    begin: Value,
-    end: Value,
+    mut begin: Value,
+    mut end: Value,
     inclusive: bool,
 ) -> Result<Range, SyntaxError> {
-    if begin.suffix != "" && end.suffix != "" && begin.suffix != end.suffix {
+    if begin.suffix.is_empty() {
+        begin.suffix = end.suffix.clone();
+    } else if end.suffix.is_empty() {
+        end.suffix = begin.suffix.clone();
+    } else if begin.suffix != end.suffix {
         return Err(SyntaxError {
             message: format!("expected suffix `{}`", begin.suffix),
             span: end.span,
