@@ -4,13 +4,13 @@ use std::borrow::Borrow;
 use std::fmt::Display;
 use std::iter::FromIterator;
 
-pub struct SyntaxError {
+pub(crate) struct SyntaxError {
     message: String,
     span: Span,
 }
 
 impl SyntaxError {
-    pub fn into_compile_error(self) -> TokenStream {
+    pub(crate) fn into_compile_error(self) -> TokenStream {
         // compile_error! { $message }
         TokenStream::from_iter(vec![
             TokenTree::Ident(Ident::new("compile_error", self.span)),
@@ -48,14 +48,14 @@ fn syntax<T: Borrow<TokenTree>, M: Display>(token: T, message: M) -> SyntaxError
     }
 }
 
-pub fn require_ident(iter: &mut TokenIter) -> Result<Ident, SyntaxError> {
+pub(crate) fn require_ident(iter: &mut TokenIter) -> Result<Ident, SyntaxError> {
     match next_token(iter)? {
         TokenTree::Ident(ident) => Ok(ident),
         other => Err(syntax(other, "expected ident")),
     }
 }
 
-pub fn require_keyword(iter: &mut TokenIter, keyword: &str) -> Result<(), SyntaxError> {
+pub(crate) fn require_keyword(iter: &mut TokenIter, keyword: &str) -> Result<(), SyntaxError> {
     let token = next_token(iter)?;
     if let TokenTree::Ident(ident) = &token {
         if ident.to_string() == keyword {
@@ -65,7 +65,7 @@ pub fn require_keyword(iter: &mut TokenIter, keyword: &str) -> Result<(), Syntax
     Err(syntax(token, format!("expected `{}`", keyword)))
 }
 
-pub fn require_integer(iter: &mut TokenIter) -> Result<u64, SyntaxError> {
+pub(crate) fn require_integer(iter: &mut TokenIter) -> Result<u64, SyntaxError> {
     let mut token = next_token(iter)?;
 
     loop {
@@ -100,7 +100,7 @@ pub fn require_integer(iter: &mut TokenIter) -> Result<u64, SyntaxError> {
     Err(syntax(token, "expected integer"))
 }
 
-pub fn require_if_punct(iter: &mut TokenIter, ch: char) -> Result<bool, SyntaxError> {
+pub(crate) fn require_if_punct(iter: &mut TokenIter, ch: char) -> Result<bool, SyntaxError> {
     let present = match iter.clone().next() {
         Some(TokenTree::Punct(_)) => {
             require_punct(iter, ch)?;
@@ -111,7 +111,7 @@ pub fn require_if_punct(iter: &mut TokenIter, ch: char) -> Result<bool, SyntaxEr
     Ok(present)
 }
 
-pub fn require_punct(iter: &mut TokenIter, ch: char) -> Result<(), SyntaxError> {
+pub(crate) fn require_punct(iter: &mut TokenIter, ch: char) -> Result<(), SyntaxError> {
     let token = next_token(iter)?;
     if let TokenTree::Punct(punct) = &token {
         if punct.as_char() == ch {
@@ -121,7 +121,7 @@ pub fn require_punct(iter: &mut TokenIter, ch: char) -> Result<(), SyntaxError> 
     Err(syntax(token, format!("expected `{}`", ch)))
 }
 
-pub fn require_braces(iter: &mut TokenIter) -> Result<TokenStream, SyntaxError> {
+pub(crate) fn require_braces(iter: &mut TokenIter) -> Result<TokenStream, SyntaxError> {
     let token = next_token(iter)?;
     if let TokenTree::Group(group) = &token {
         if group.delimiter() == Delimiter::Brace {
@@ -131,7 +131,7 @@ pub fn require_braces(iter: &mut TokenIter) -> Result<TokenStream, SyntaxError> 
     Err(syntax(token, "expected curly braces"))
 }
 
-pub fn require_end(iter: &mut TokenIter) -> Result<(), SyntaxError> {
+pub(crate) fn require_end(iter: &mut TokenIter) -> Result<(), SyntaxError> {
     match iter.next() {
         Some(token) => Err(syntax(token, "unexpected token")),
         None => Ok(()),
