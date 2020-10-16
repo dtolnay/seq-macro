@@ -161,5 +161,6 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
     }
 
     let int = digits.parse::<u64>().ok()?;
-    Some(Value::int(int, suffix))
+    let span = lit.span();
+    Some(Value { int, suffix, span })
 }

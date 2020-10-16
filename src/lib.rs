@@ -64,7 +64,7 @@
 mod parse;
 
 use crate::parse::*;
-use proc_macro::{Delimiter, Group, Ident, Literal, TokenStream, TokenTree};
+use proc_macro::{Delimiter, Group, Ident, Literal, Span, TokenStream, TokenTree};
 use std::iter::{self, FromIterator};
 
 #[proc_macro]
@@ -84,12 +84,7 @@ struct Range {
 struct Value {
     int: u64,
     suffix: String,
-}
-
-impl Value {
-    fn int(int: u64, suffix: String) -> Self {
-        Value { int, suffix }
-    }
+    span: Span,
 }
 
 impl IntoIterator for &Range {
@@ -98,9 +93,17 @@ impl IntoIterator for &Range {
 
     fn into_iter(self) -> Self::IntoIter {
         if self.inclusive {
-            Box::new((self.begin.int..=self.end.int).map(|i| Value::int(i, String::new())))
+            Box::new((self.begin.int..=self.end.int).map(|int| Value {
+                int,
+                suffix: String::new(),
+                span: Span::call_site(),
+            }))
         } else {
-            Box::new((self.begin.int..self.end.int).map(|i| Value::int(i, String::new())))
+            Box::new((self.begin.int..self.end.int).map(|int| Value {
+                int,
+                suffix: String::new(),
+                span: Span::call_site(),
+            }))
         }
     }
 }
