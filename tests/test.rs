@@ -49,6 +49,12 @@ fn test_stringify() {
     assert_eq!(strings, ["9", "10", "11"]);
 }
 
+#[test]
+fn test_underscores() {
+    let n = seq!(N in 100_000..100_001 { N });
+    assert_eq!(100_000, n);
+}
+
 pub mod test_enum {
     use seq_macro::seq;
 
