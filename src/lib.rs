@@ -87,23 +87,25 @@ struct Value {
     span: Span,
 }
 
-impl IntoIterator for &Range {
-    type Item = Value;
-    type IntoIter = Box<dyn Iterator<Item = Value>>;
+struct Splice<'a> {
+    int: u64,
+    suffix: &'a str,
+}
+
+impl<'a> IntoIterator for &'a Range {
+    type Item = Splice<'a>;
+    type IntoIter = Box<dyn Iterator<Item = Splice<'a>> + 'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let suffix = self.end.suffix.clone();
         if self.inclusive {
-            Box::new((self.begin.int..=self.end.int).map(move |int| Value {
+            Box::new((self.begin.int..=self.end.int).map(move |int| Splice {
                 int,
-                suffix: suffix.clone(),
-                span: Span::call_site(),
+                suffix: &self.end.suffix,
             }))
         } else {
-            Box::new((self.begin.int..self.end.int).map(move |int| Value {
+            Box::new((self.begin.int..self.end.int).map(move |int| Splice {
                 int,
-                suffix: suffix.clone(),
-                span: Span::call_site(),
+                suffix: &self.end.suffix,
             }))
         }
     }
@@ -141,7 +143,7 @@ fn repeat(var: &Ident, range: &Range, body: &TokenStream) -> TokenStream {
     repeated
 }
 
-fn substitute_value(var: &Ident, value: &Value, body: TokenStream) -> TokenStream {
+fn substitute_value(var: &Ident, splice: &Splice, body: TokenStream) -> TokenStream {
     let mut tokens = Vec::from_iter(body);
 
     let mut i = 0;
@@ -153,7 +155,7 @@ fn substitute_value(var: &Ident, value: &Value, body: TokenStream) -> TokenStrea
         };
         if replace {
             let original_span = tokens[i].span();
-            let mut literal = value.literal();
+            let mut literal = splice.literal();
             literal.set_span(original_span);
             tokens[i] = TokenTree::Literal(literal);
             i += 1;
@@ -171,7 +173,7 @@ fn substitute_value(var: &Ident, value: &Value, body: TokenStream) -> TokenStrea
                 _ => None,
             };
             if let Some(prefix) = prefix {
-                let concat = format!("{}{}", prefix, value.int);
+                let concat = format!("{}{}", prefix, splice.int);
                 let ident = Ident::new(&concat, prefix.span());
                 tokens.splice(i..i + 3, iter::once(TokenTree::Ident(ident)));
                 i += 1;
@@ -182,7 +184,7 @@ fn substitute_value(var: &Ident, value: &Value, body: TokenStream) -> TokenStrea
         // Recursively substitute content nested in a group.
         if let TokenTree::Group(group) = &mut tokens[i] {
             let original_span = group.span();
-            let content = substitute_value(var, value, group.stream());
+            let content = substitute_value(var, splice, group.stream());
             *group = Group::new(group.delimiter(), content);
             group.set_span(original_span);
         }
@@ -254,7 +256,7 @@ fn expand_repetitions(
     TokenStream::from_iter(tokens)
 }
 
-impl Value {
+impl Splice<'_> {
     fn literal(&self) -> Literal {
         if self.suffix.is_empty() {
             return Literal::u64_unsuffixed(self.int);
