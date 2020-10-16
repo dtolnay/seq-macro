@@ -1,3 +1,4 @@
+use crate::Value;
 use proc_macro::token_stream::IntoIter as TokenIter;
 use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::borrow::Borrow;
@@ -65,7 +66,7 @@ pub(crate) fn require_keyword(iter: &mut TokenIter, keyword: &str) -> Result<(),
     Err(syntax(token, format!("expected `{}`", keyword)))
 }
 
-pub(crate) fn require_integer(iter: &mut TokenIter) -> Result<u64, SyntaxError> {
+pub(crate) fn require_value(iter: &mut TokenIter) -> Result<Value, SyntaxError> {
     let mut token = next_token(iter)?;
 
     loop {
@@ -88,7 +89,7 @@ pub(crate) fn require_integer(iter: &mut TokenIter) -> Result<u64, SyntaxError> 
             }
             TokenTree::Literal(lit) => {
                 if let Ok(integer) = lit.to_string().parse::<u64>() {
-                    return Ok(integer);
+                    return Ok(Value(integer));
                 }
                 token = TokenTree::Literal(lit);
                 return Err(syntax(token, "expected unsuffixed integer literal"));
