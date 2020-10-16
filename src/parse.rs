@@ -140,6 +140,15 @@ pub(crate) fn require_end(iter: &mut TokenIter) -> Result<(), SyntaxError> {
 
 fn parse_literal(lit: &Literal) -> Option<Value> {
     let repr = lit.to_string();
-    let int = repr.parse::<u64>().ok()?;
+    assert!(!repr.starts_with('_'));
+
+    let mut digits = String::new();
+    for ch in repr.chars() {
+        if ch != '_' {
+            digits.push(ch);
+        }
+    }
+
+    let int = digits.parse::<u64>().ok()?;
     Some(Value::int(int))
 }
