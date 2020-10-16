@@ -75,14 +75,12 @@ pub fn seq(input: TokenStream) -> TokenStream {
     }
 }
 
-#[derive(Copy, Clone)]
 struct Range {
     begin: Value,
     end: Value,
     inclusive: bool,
 }
 
-#[derive(Copy, Clone)]
 struct Value {
     int: u64,
     // TODO: suffix
@@ -94,7 +92,7 @@ impl Value {
     }
 }
 
-impl IntoIterator for Range {
+impl IntoIterator for &Range {
     type Item = Value;
     type IntoIter = Box<dyn Iterator<Item = Value>>;
 
@@ -126,24 +124,24 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
     };
 
     let mut found_repetition = false;
-    let expanded = expand_repetitions(&var, range, body.clone(), &mut found_repetition);
+    let expanded = expand_repetitions(&var, &range, body.clone(), &mut found_repetition);
     if found_repetition {
         Ok(expanded)
     } else {
         // If no `#(...)*`, repeat the entire body.
-        Ok(repeat(&var, range, &body))
+        Ok(repeat(&var, &range, &body))
     }
 }
 
-fn repeat(var: &Ident, range: Range, body: &TokenStream) -> TokenStream {
+fn repeat(var: &Ident, range: &Range, body: &TokenStream) -> TokenStream {
     let mut repeated = TokenStream::new();
     for value in range {
-        repeated.extend(substitute_value(&var, value, body.clone()));
+        repeated.extend(substitute_value(&var, &value, body.clone()));
     }
     repeated
 }
 
-fn substitute_value(var: &Ident, value: Value, body: TokenStream) -> TokenStream {
+fn substitute_value(var: &Ident, value: &Value, body: TokenStream) -> TokenStream {
     let mut tokens = Vec::from_iter(body);
 
     let mut i = 0;
@@ -215,7 +213,7 @@ fn enter_repetition(tokens: &[TokenTree]) -> Option<TokenStream> {
 
 fn expand_repetitions(
     var: &Ident,
-    range: Range,
+    range: &Range,
     body: TokenStream,
     found_repetition: &mut bool,
 ) -> TokenStream {
@@ -246,7 +244,7 @@ fn expand_repetitions(
         *found_repetition = true;
         let mut repeated = Vec::new();
         for value in range {
-            repeated.extend(substitute_value(var, value, template.clone()));
+            repeated.extend(substitute_value(var, &value, template.clone()));
         }
         let repeated_len = repeated.len();
         tokens.splice(i..i + 3, repeated);
