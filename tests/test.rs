@@ -61,6 +61,17 @@ fn test_suffixed() {
     assert_eq!(n, "0u16");
 }
 
+#[test]
+fn test_padding() {
+    seq!(N in 098..=100 {
+        fn e#N() -> &'static str {
+            stringify!(N)
+        }
+    });
+    let strings = [e098(), e099(), e100()];
+    assert_eq!(strings, ["098", "099", "100"]);
+}
+
 pub mod test_enum {
     use seq_macro::seq;
 
