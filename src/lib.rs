@@ -80,17 +80,20 @@ struct Range {
     end: u64,
     inclusive: bool,
     suffix: String,
+    width: usize,
 }
 
 struct Value {
     int: u64,
     suffix: String,
+    width: usize,
     span: Span,
 }
 
 struct Splice<'a> {
     int: u64,
     suffix: &'a str,
+    width: usize,
 }
 
 impl<'a> IntoIterator for &'a Range {
@@ -99,10 +102,11 @@ impl<'a> IntoIterator for &'a Range {
 
     fn into_iter(self) -> Self::IntoIter {
         let suffix = &self.suffix;
+        let width = self.width;
         if self.inclusive {
-            Box::new((self.begin..=self.end).map(move |int| Splice { int, suffix }))
+            Box::new((self.begin..=self.end).map(move |int| Splice { int, suffix, width }))
         } else {
-            Box::new((self.begin..self.end).map(move |int| Splice { int, suffix }))
+            Box::new((self.begin..self.end).map(move |int| Splice { int, suffix, width }))
         }
     }
 }

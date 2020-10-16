@@ -2,6 +2,7 @@ use crate::{Range, Value};
 use proc_macro::token_stream::IntoIter as TokenIter;
 use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::borrow::Borrow;
+use std::cmp;
 use std::fmt::Display;
 use std::iter::FromIterator;
 
@@ -158,6 +159,7 @@ pub(crate) fn validate_range(
         end: end.int,
         inclusive,
         suffix,
+        width: cmp::min(begin.width, end.width),
     })
 }
 
@@ -184,6 +186,12 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
     }
 
     let int = digits.parse::<u64>().ok()?;
+    let width = digits.len();
     let span = lit.span();
-    Some(Value { int, suffix, span })
+    Some(Value {
+        int,
+        suffix,
+        width,
+        span,
+    })
 }
