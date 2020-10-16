@@ -76,9 +76,10 @@ pub fn seq(input: TokenStream) -> TokenStream {
 }
 
 struct Range {
-    begin: Value,
-    end: Value,
+    begin: u64,
+    end: u64,
     inclusive: bool,
+    suffix: String,
 }
 
 struct Value {
@@ -97,16 +98,11 @@ impl<'a> IntoIterator for &'a Range {
     type IntoIter = Box<dyn Iterator<Item = Splice<'a>> + 'a>;
 
     fn into_iter(self) -> Self::IntoIter {
+        let suffix = &self.suffix;
         if self.inclusive {
-            Box::new((self.begin.int..=self.end.int).map(move |int| Splice {
-                int,
-                suffix: &self.end.suffix,
-            }))
+            Box::new((self.begin..=self.end).map(move |int| Splice { int, suffix }))
         } else {
-            Box::new((self.begin.int..self.end.int).map(move |int| Splice {
-                int,
-                suffix: &self.end.suffix,
-            }))
+            Box::new((self.begin..self.end).map(move |int| Splice { int, suffix }))
         }
     }
 }
