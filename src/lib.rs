@@ -77,20 +77,23 @@ pub fn seq(input: TokenStream) -> TokenStream {
 
 #[derive(Copy, Clone)]
 struct Range {
-    begin: u64,
-    end: u64,
+    begin: Value,
+    end: Value,
     inclusive: bool,
 }
 
+#[derive(Copy, Clone)]
+struct Value(u64);
+
 impl IntoIterator for Range {
-    type Item = u64;
-    type IntoIter = Box<dyn Iterator<Item = u64>>;
+    type Item = Value;
+    type IntoIter = Box<dyn Iterator<Item = Value>>;
 
     fn into_iter(self) -> Self::IntoIter {
         if self.inclusive {
-            Box::new(self.begin..=self.end)
+            Box::new((self.begin.0..=self.end.0).map(Value))
         } else {
-            Box::new(self.begin..self.end)
+            Box::new((self.begin.0..self.end.0).map(Value))
         }
     }
 }
@@ -99,11 +102,11 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
     let mut iter = input.into_iter();
     let var = require_ident(&mut iter)?;
     require_keyword(&mut iter, "in")?;
-    let begin = require_integer(&mut iter)?;
+    let begin = require_value(&mut iter)?;
     require_punct(&mut iter, '.')?;
     require_punct(&mut iter, '.')?;
     let inclusive = require_if_punct(&mut iter, '=')?;
-    let end = require_integer(&mut iter)?;
+    let end = require_value(&mut iter)?;
     let body = require_braces(&mut iter)?;
     require_end(&mut iter)?;
 
@@ -125,13 +128,13 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
 
 fn repeat(var: &Ident, range: Range, body: &TokenStream) -> TokenStream {
     let mut repeated = TokenStream::new();
-    for number in range {
-        repeated.extend(substitute_number(&var, number, body.clone()));
+    for value in range {
+        repeated.extend(substitute_value(&var, value, body.clone()));
     }
     repeated
 }
 
-fn substitute_number(var: &Ident, number: u64, body: TokenStream) -> TokenStream {
+fn substitute_value(var: &Ident, value: Value, body: TokenStream) -> TokenStream {
     let mut tokens = Vec::from_iter(body);
 
     let mut i = 0;
@@ -143,7 +146,7 @@ fn substitute_number(var: &Ident, number: u64, body: TokenStream) -> TokenStream
         };
         if replace {
             let original_span = tokens[i].span();
-            let mut literal = Literal::u64_unsuffixed(number);
+            let mut literal = Literal::u64_unsuffixed(value.0);
             literal.set_span(original_span);
             tokens[i] = TokenTree::Literal(literal);
             i += 1;
@@ -161,7 +164,7 @@ fn substitute_number(var: &Ident, number: u64, body: TokenStream) -> TokenStream
                 _ => None,
             };
             if let Some(prefix) = prefix {
-                let concat = format!("{}{}", prefix, number);
+                let concat = format!("{}{}", prefix, value.0);
                 let ident = Ident::new(&concat, prefix.span());
                 tokens.splice(i..i + 3, iter::once(TokenTree::Ident(ident)));
                 i += 1;
@@ -172,7 +175,7 @@ fn substitute_number(var: &Ident, number: u64, body: TokenStream) -> TokenStream
         // Recursively substitute content nested in a group.
         if let TokenTree::Group(group) = &mut tokens[i] {
             let original_span = group.span();
-            let content = substitute_number(var, number, group.stream());
+            let content = substitute_value(var, value, group.stream());
             *group = Group::new(group.delimiter(), content);
             group.set_span(original_span);
         }
@@ -233,8 +236,8 @@ fn expand_repetitions(
         };
         *found_repetition = true;
         let mut repeated = Vec::new();
-        for number in range {
-            repeated.extend(substitute_number(var, number, template.clone()));
+        for value in range {
+            repeated.extend(substitute_value(var, value, template.clone()));
         }
         let repeated_len = repeated.len();
         tokens.splice(i..i + 3, repeated);
