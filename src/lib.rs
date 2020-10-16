@@ -83,12 +83,12 @@ struct Range {
 
 struct Value {
     int: u64,
-    // TODO: suffix
+    suffix: String,
 }
 
 impl Value {
-    fn int(int: u64) -> Self {
-        Value { int }
+    fn int(int: u64, suffix: String) -> Self {
+        Value { int, suffix }
     }
 }
 
@@ -98,9 +98,9 @@ impl IntoIterator for &Range {
 
     fn into_iter(self) -> Self::IntoIter {
         if self.inclusive {
-            Box::new((self.begin.int..=self.end.int).map(Value::int))
+            Box::new((self.begin.int..=self.end.int).map(|i| Value::int(i, String::new())))
         } else {
-            Box::new((self.begin.int..self.end.int).map(Value::int))
+            Box::new((self.begin.int..self.end.int).map(|i| Value::int(i, String::new())))
         }
     }
 }

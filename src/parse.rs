@@ -143,12 +143,23 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
     assert!(!repr.starts_with('_'));
 
     let mut digits = String::new();
-    for ch in repr.chars() {
-        if ch != '_' {
-            digits.push(ch);
+    let mut suffix = String::new();
+
+    for (i, ch) in repr.char_indices() {
+        match ch {
+            '_' => continue,
+            '0'..='9' => digits.push(ch),
+            _ => {
+                if digits.is_empty() {
+                    return None;
+                }
+                suffix = repr;
+                suffix.replace_range(..i, "");
+                break;
+            }
         }
     }
 
     let int = digits.parse::<u64>().ok()?;
-    Some(Value::int(int))
+    Some(Value::int(int, suffix))
 }
