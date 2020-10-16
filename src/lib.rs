@@ -61,8 +61,6 @@
 //! }
 //! ```
 
-extern crate proc_macro;
-
 mod parse;
 
 use crate::parse::*;
