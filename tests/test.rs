@@ -37,6 +37,18 @@ fn test_fn() {
     assert_eq!(sum, 100 + 2 + 4 + 6);
 }
 
+#[test]
+fn test_stringify() {
+    let strings = seq!(N in 9..12 {
+        [
+            #(
+                stringify!(N),
+            )*
+        ]
+    });
+    assert_eq!(strings, ["9", "10", "11"]);
+}
+
 pub mod test_enum {
     use seq_macro::seq;
 
