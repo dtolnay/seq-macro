@@ -107,15 +107,14 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
     let body = require_braces(&mut iter)?;
     require_end(&mut iter)?;
 
-    let range = Range { begin, end, inclusive };
+    let range = Range {
+        begin,
+        end,
+        inclusive,
+    };
 
     let mut found_repetition = false;
-    let expanded = expand_repetitions(
-        &var,
-        range,
-        body.clone(),
-        &mut found_repetition,
-    );
+    let expanded = expand_repetitions(&var, range, body.clone(), &mut found_repetition);
     if found_repetition {
         Ok(expanded)
     } else {
@@ -214,8 +213,7 @@ fn expand_repetitions(
     let mut i = 0;
     while i < tokens.len() {
         if let TokenTree::Group(group) = &mut tokens[i] {
-            let content =
-                expand_repetitions(var, range, group.stream(), found_repetition);
+            let content = expand_repetitions(var, range, group.stream(), found_repetition);
             let original_span = group.span();
             *group = Group::new(group.delimiter(), content);
             group.set_span(original_span);
