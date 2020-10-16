@@ -55,6 +55,12 @@ fn test_underscores() {
     assert_eq!(100_000, n);
 }
 
+#[test]
+fn test_suffixed() {
+    let n = seq!(N in 0..1u16 { stringify!(N) });
+    assert_eq!(n, "0u16");
+}
+
 pub mod test_enum {
     use seq_macro::seq;
 

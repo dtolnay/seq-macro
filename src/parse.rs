@@ -1,4 +1,4 @@
-use crate::Value;
+use crate::{Range, Value};
 use proc_macro::token_stream::IntoIter as TokenIter;
 use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::borrow::Borrow;
@@ -138,17 +138,51 @@ pub(crate) fn require_end(iter: &mut TokenIter) -> Result<(), SyntaxError> {
     }
 }
 
+pub(crate) fn validate_range(
+    mut begin: Value,
+    mut end: Value,
+    inclusive: bool,
+) -> Result<Range, SyntaxError> {
+    if begin.suffix.is_empty() {
+        begin.suffix = end.suffix.clone();
+    } else if end.suffix.is_empty() {
+        end.suffix = begin.suffix.clone();
+    } else if begin.suffix != end.suffix {
+        return Err(SyntaxError {
+            message: format!("expected suffix `{}`", begin.suffix),
+            span: end.span,
+        });
+    }
+    Ok(Range {
+        begin,
+        end,
+        inclusive,
+    })
+}
+
 fn parse_literal(lit: &Literal) -> Option<Value> {
     let repr = lit.to_string();
     assert!(!repr.starts_with('_'));
 
     let mut digits = String::new();
-    for ch in repr.chars() {
-        if ch != '_' {
-            digits.push(ch);
+    let mut suffix = String::new();
+
+    for (i, ch) in repr.char_indices() {
+        match ch {
+            '_' => continue,
+            '0'..='9' => digits.push(ch),
+            _ => {
+                if digits.is_empty() {
+                    return None;
+                }
+                suffix = repr;
+                suffix.replace_range(..i, "");
+                break;
+            }
         }
     }
 
     let int = digits.parse::<u64>().ok()?;
-    Some(Value::int(int))
+    let span = lit.span();
+    Some(Value { int, suffix, span })
 }
