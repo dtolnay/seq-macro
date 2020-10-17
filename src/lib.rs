@@ -258,10 +258,7 @@ fn expand_repetitions(
 
 impl Splice<'_> {
     fn literal(&self) -> Literal {
-        if self.suffix.is_empty() {
-            return Literal::u64_unsuffixed(self.int);
-        }
-        let repr = format!("{}{}", self.int, self.suffix);
+        let repr = format!("{0:02$}{1}", self.int, self.suffix, self.width);
         let tokens = repr.parse::<TokenStream>().unwrap();
         let mut iter = tokens.into_iter();
         let literal = match iter.next() {
