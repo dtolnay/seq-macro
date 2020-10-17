@@ -40,8 +40,6 @@ fn main() {
 }
 ```
 
-There are just two more features to know about:
-
 - If the input tokens contain a section surrounded by `#(` ... `)*` then only
   that part is repeated.
 
@@ -64,6 +62,20 @@ seq!(N in 64..=127 {
 fn main() {
     assert_eq!("Variant99", format!("{:?}", Demo::Variant99));
 }
+```
+
+- Byte and character ranges are supported: `b'a'..=b'z'`, `'a'..='z'`.
+
+- If the range bounds are written in binary, octal, hex, or with zero padding,
+  those features are preserved in any generated tokens.
+
+```rust
+use seq_macro::seq;
+
+seq!(P in 0x000..=0x00F {
+    // expands to structs Pin000, ..., Pin009, Pin00A, ..., Pin00F
+    struct Pin#P;
+});
 ```
 
 <br>
