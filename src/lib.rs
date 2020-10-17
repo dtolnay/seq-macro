@@ -90,6 +90,7 @@ struct Value {
     kind: Kind,
     suffix: String,
     width: usize,
+    radix: u32,
     span: Span,
 }
 

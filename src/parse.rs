@@ -190,6 +190,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
             kind: Kind::Byte,
             suffix: String::new(),
             width: 0,
+            radix: 10,
             span,
         });
     }
@@ -200,14 +201,30 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
             kind: Kind::Char,
             suffix: String::new(),
             width: 0,
+            radix: 0,
             span,
         });
     }
 
+    let radix = if repr.starts_with("0b") {
+        2
+    } else if repr.starts_with("0o") {
+        8
+    } else if repr.starts_with("0x") {
+        16
+    } else {
+        10
+    };
+
+    let mut iter = repr.char_indices();
     let mut digits = String::new();
     let mut suffix = String::new();
 
-    for (i, ch) in repr.char_indices() {
+    if radix != 10 {
+        let _ = iter.nth(1);
+    }
+
+    for (i, ch) in iter {
         match ch {
             '_' => continue,
             '0'..='9' => digits.push(ch),
@@ -223,7 +240,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
         }
     }
 
-    let int = digits.parse::<u64>().ok()?;
+    let int = u64::from_str_radix(&digits, radix).ok()?;
     let kind = Kind::Int;
     let width = digits.len();
     Some(Value {
@@ -231,6 +248,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
         kind,
         suffix,
         width,
+        radix,
         span,
     })
 }
