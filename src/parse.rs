@@ -211,6 +211,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
         match ch {
             '_' => continue,
             '0'..='9' => digits.push(ch),
+            '.' => return None,
             _ => {
                 if digits.is_empty() {
                     return None;
