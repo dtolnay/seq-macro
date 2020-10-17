@@ -219,10 +219,20 @@ fn substitute_value(var: &Ident, splice: &Splice, body: TokenStream) -> TokenStr
         // Substitute our variable concatenated onto some prefix, `Prefix#N`.
         if i + 3 <= tokens.len() {
             let prefix = match &tokens[i..i + 3] {
-                [TokenTree::Ident(prefix), TokenTree::Punct(pound), TokenTree::Ident(ident)]
+                [first, TokenTree::Punct(pound), TokenTree::Ident(ident)]
                     if pound.as_char() == '#' && ident.to_string() == var.to_string() =>
                 {
-                    Some(prefix.clone())
+                    match first {
+                        TokenTree::Ident(ident) => Some(ident.clone()),
+                        TokenTree::Group(group) => {
+                            let mut iter = group.stream().into_iter().fuse();
+                            match (iter.next(), iter.next()) {
+                                (Some(TokenTree::Ident(ident)), None) => Some(ident),
+                                _ => None,
+                            }
+                        }
+                        _ => None,
+                    }
                 }
                 _ => None,
             };
