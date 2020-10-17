@@ -100,6 +100,7 @@ struct Splice<'a> {
     kind: Kind,
     suffix: &'a str,
     width: usize,
+    radix: u32,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -119,6 +120,7 @@ impl<'a> IntoIterator for &'a Range {
             kind: self.kind,
             suffix: &self.suffix,
             width: self.width,
+            radix: self.radix,
         };
         match self.kind {
             Kind::Int | Kind::Byte => {
@@ -297,7 +299,13 @@ impl Splice<'_> {
     fn literal(&self) -> Literal {
         match self.kind {
             Kind::Int | Kind::Byte => {
-                let repr = format!("{0:02$}{1}", self.int, self.suffix, self.width);
+                let repr = match self.radix {
+                    2 => format!("0b{0:02$b}{1}", self.int, self.suffix, self.width),
+                    8 => format!("0o{0:02$o}{1}", self.int, self.suffix, self.width),
+                    10 => format!("{0:02$}{1}", self.int, self.suffix, self.width),
+                    16 => format!("0x{0:02$x}{1}", self.int, self.suffix, self.width),
+                    _ => unreachable!(),
+                };
                 let tokens = repr.parse::<TokenStream>().unwrap();
                 let mut iter = tokens.into_iter();
                 let literal = match iter.next() {
