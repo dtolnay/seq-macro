@@ -188,7 +188,13 @@ fn substitute_value(var: &Ident, splice: &Splice, body: TokenStream) -> TokenStr
                 _ => None,
             };
             if let Some(prefix) = prefix {
-                let concat = format!("{0}{1:02$}", prefix, splice.int, splice.width);
+                let number = match splice.kind {
+                    Kind::Int => format!("{0:01$}", splice.int, splice.width),
+                    Kind::Byte | Kind::Char => {
+                        char::from_u32(splice.int as u32).unwrap().to_string()
+                    }
+                };
+                let concat = format!("{}{}", prefix, number);
                 let ident = Ident::new(&concat, prefix.span());
                 tokens.splice(i..i + 3, iter::once(TokenTree::Ident(ident)));
                 i += 1;
