@@ -180,8 +180,19 @@ pub(crate) fn validate_range(
 }
 
 fn parse_literal(lit: &Literal) -> Option<Value> {
+    let span = lit.span();
     let repr = lit.to_string();
     assert!(!repr.starts_with('_'));
+
+    if repr.starts_with("b'") && repr.ends_with('\'') && repr.len() == 4 {
+        return Some(Value {
+            int: repr.as_bytes()[2] as u64,
+            kind: Kind::Byte,
+            suffix: String::new(),
+            width: 0,
+            span,
+        });
+    }
 
     let mut digits = String::new();
     let mut suffix = String::new();
@@ -204,7 +215,6 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
     let int = digits.parse::<u64>().ok()?;
     let kind = Kind::Int;
     let width = digits.len();
-    let span = lit.span();
     Some(Value {
         int,
         kind,
