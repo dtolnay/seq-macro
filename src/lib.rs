@@ -83,6 +83,7 @@ struct Range {
     kind: Kind,
     suffix: String,
     width: usize,
+    radix: u32,
 }
 
 struct Value {

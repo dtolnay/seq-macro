@@ -169,6 +169,22 @@ pub(crate) fn validate_range(
         });
     };
 
+    let radix = if begin.radix == end.radix {
+        begin.radix
+    } else {
+        let expected = match begin.radix {
+            2 => "binary",
+            8 => "octal",
+            10 => "base 10",
+            16 => "hexadecimal",
+            _ => unreachable!(),
+        };
+        return Err(SyntaxError {
+            message: format!("expected {} literal", expected),
+            span: end.span,
+        });
+    };
+
     Ok(Range {
         begin: begin.int,
         end: end.int,
@@ -176,6 +192,7 @@ pub(crate) fn validate_range(
         kind,
         suffix,
         width: cmp::min(begin.width, end.width),
+        radix,
     })
 }
 
