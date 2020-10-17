@@ -99,7 +99,7 @@ struct Splice<'a> {
     width: usize,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 enum Kind {
     Int,
     Byte,

@@ -144,6 +144,20 @@ pub(crate) fn validate_range(
     end: Value,
     inclusive: bool,
 ) -> Result<Range, SyntaxError> {
+    let kind = if begin.kind == end.kind {
+        begin.kind
+    } else {
+        let expected = match begin.kind {
+            Kind::Int => "integer",
+            Kind::Byte => "byte",
+            Kind::Char => "character",
+        };
+        return Err(SyntaxError {
+            message: format!("expected {} literal", expected),
+            span: end.span,
+        });
+    };
+
     let suffix = if begin.suffix.is_empty() {
         end.suffix
     } else if end.suffix.is_empty() || begin.suffix == end.suffix {
@@ -154,11 +168,12 @@ pub(crate) fn validate_range(
             span: end.span,
         });
     };
+
     Ok(Range {
         begin: begin.int,
         end: end.int,
         inclusive,
-        kind: begin.kind,
+        kind,
         suffix,
         width: cmp::min(begin.width, end.width),
     })
