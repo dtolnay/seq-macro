@@ -171,6 +171,10 @@ pub(crate) fn validate_range(
 
     let radix = if begin.radix == end.radix {
         begin.radix
+    } else if begin.radix == Radix::LowerHex && end.radix == Radix::UpperHex
+        || begin.radix == Radix::UpperHex && end.radix == Radix::LowerHex
+    {
+        Radix::UpperHex
     } else {
         let expected = match begin.radix {
             Radix::Binary => "binary",
@@ -222,7 +226,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
         });
     }
 
-    let (radix, radix_n) = if repr.starts_with("0b") {
+    let (mut radix, radix_n) = if repr.starts_with("0b") {
         (Radix::Binary, 2)
     } else if repr.starts_with("0o") {
         (Radix::Octal, 8)
@@ -246,6 +250,10 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
         match ch {
             '_' => continue,
             '0'..='9' => digits.push(ch),
+            'A'..='F' if radix == Radix::LowerHex => {
+                digits.push(ch);
+                radix = Radix::UpperHex;
+            }
             'a'..='f' | 'A'..='F' if radix_n == 16 => digits.push(ch),
             '.' => return None,
             _ => {
