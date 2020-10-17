@@ -1,4 +1,4 @@
-use crate::{Range, Value};
+use crate::{Kind, Range, Value};
 use proc_macro::token_stream::IntoIter as TokenIter;
 use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::borrow::Borrow;
@@ -144,6 +144,20 @@ pub(crate) fn validate_range(
     end: Value,
     inclusive: bool,
 ) -> Result<Range, SyntaxError> {
+    let kind = if begin.kind == end.kind {
+        begin.kind
+    } else {
+        let expected = match begin.kind {
+            Kind::Int => "integer",
+            Kind::Byte => "byte",
+            Kind::Char => "character",
+        };
+        return Err(SyntaxError {
+            message: format!("expected {} literal", expected),
+            span: end.span,
+        });
+    };
+
     let suffix = if begin.suffix.is_empty() {
         end.suffix
     } else if end.suffix.is_empty() || begin.suffix == end.suffix {
@@ -154,18 +168,41 @@ pub(crate) fn validate_range(
             span: end.span,
         });
     };
+
     Ok(Range {
         begin: begin.int,
         end: end.int,
         inclusive,
+        kind,
         suffix,
         width: cmp::min(begin.width, end.width),
     })
 }
 
 fn parse_literal(lit: &Literal) -> Option<Value> {
+    let span = lit.span();
     let repr = lit.to_string();
     assert!(!repr.starts_with('_'));
+
+    if repr.starts_with("b'") && repr.ends_with('\'') && repr.len() == 4 {
+        return Some(Value {
+            int: repr.as_bytes()[2] as u64,
+            kind: Kind::Byte,
+            suffix: String::new(),
+            width: 0,
+            span,
+        });
+    }
+
+    if repr.starts_with('\'') && repr.ends_with('\'') && repr.chars().count() == 3 {
+        return Some(Value {
+            int: repr[1..].chars().next().unwrap() as u64,
+            kind: Kind::Char,
+            suffix: String::new(),
+            width: 0,
+            span,
+        });
+    }
 
     let mut digits = String::new();
     let mut suffix = String::new();
@@ -186,10 +223,11 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
     }
 
     let int = digits.parse::<u64>().ok()?;
+    let kind = Kind::Int;
     let width = digits.len();
-    let span = lit.span();
     Some(Value {
         int,
+        kind,
         suffix,
         width,
         span,

@@ -65,6 +65,7 @@ mod parse;
 
 use crate::parse::*;
 use proc_macro::{Delimiter, Group, Ident, Literal, Span, TokenStream, TokenTree};
+use std::char;
 use std::iter::{self, FromIterator};
 
 #[proc_macro]
@@ -79,12 +80,14 @@ struct Range {
     begin: u64,
     end: u64,
     inclusive: bool,
+    kind: Kind,
     suffix: String,
     width: usize,
 }
 
 struct Value {
     int: u64,
+    kind: Kind,
     suffix: String,
     width: usize,
     span: Span,
@@ -92,8 +95,16 @@ struct Value {
 
 struct Splice<'a> {
     int: u64,
+    kind: Kind,
     suffix: &'a str,
     width: usize,
+}
+
+#[derive(Copy, Clone, PartialEq)]
+enum Kind {
+    Int,
+    Byte,
+    Char,
 }
 
 impl<'a> IntoIterator for &'a Range {
@@ -101,13 +112,30 @@ impl<'a> IntoIterator for &'a Range {
     type IntoIter = Box<dyn Iterator<Item = Splice<'a>> + 'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let suffix = &self.suffix;
-        let width = self.width;
-        let splice = move |int| Splice { int, suffix, width };
-        if self.inclusive {
-            Box::new((self.begin..=self.end).map(splice))
-        } else {
-            Box::new((self.begin..self.end).map(splice))
+        let splice = move |int| Splice {
+            int,
+            kind: self.kind,
+            suffix: &self.suffix,
+            width: self.width,
+        };
+        match self.kind {
+            Kind::Int | Kind::Byte => {
+                if self.inclusive {
+                    Box::new((self.begin..=self.end).map(splice))
+                } else {
+                    Box::new((self.begin..self.end).map(splice))
+                }
+            }
+            Kind::Char => {
+                let begin = char::from_u32(self.begin as u32).unwrap();
+                let end = char::from_u32(self.end as u32).unwrap();
+                let int = |ch| u64::from(u32::from(ch));
+                if self.inclusive {
+                    Box::new((begin..=end).map(int).map(splice))
+                } else {
+                    Box::new((begin..end).map(int).map(splice))
+                }
+            }
         }
     }
 }
@@ -174,7 +202,13 @@ fn substitute_value(var: &Ident, splice: &Splice, body: TokenStream) -> TokenStr
                 _ => None,
             };
             if let Some(prefix) = prefix {
-                let concat = format!("{0}{1:02$}", prefix, splice.int, splice.width);
+                let number = match splice.kind {
+                    Kind::Int => format!("{0:01$}", splice.int, splice.width),
+                    Kind::Byte | Kind::Char => {
+                        char::from_u32(splice.int as u32).unwrap().to_string()
+                    }
+                };
+                let concat = format!("{}{}", prefix, number);
                 let ident = Ident::new(&concat, prefix.span());
                 tokens.splice(i..i + 3, iter::once(TokenTree::Ident(ident)));
                 i += 1;
@@ -259,14 +293,22 @@ fn expand_repetitions(
 
 impl Splice<'_> {
     fn literal(&self) -> Literal {
-        let repr = format!("{0:02$}{1}", self.int, self.suffix, self.width);
-        let tokens = repr.parse::<TokenStream>().unwrap();
-        let mut iter = tokens.into_iter();
-        let literal = match iter.next() {
-            Some(TokenTree::Literal(literal)) => literal,
-            _ => unreachable!(),
-        };
-        assert!(iter.next().is_none());
-        literal
+        match self.kind {
+            Kind::Int | Kind::Byte => {
+                let repr = format!("{0:02$}{1}", self.int, self.suffix, self.width);
+                let tokens = repr.parse::<TokenStream>().unwrap();
+                let mut iter = tokens.into_iter();
+                let literal = match iter.next() {
+                    Some(TokenTree::Literal(literal)) => literal,
+                    _ => unreachable!(),
+                };
+                assert!(iter.next().is_none());
+                literal
+            }
+            Kind::Char => {
+                let ch = char::from_u32(self.int as u32).unwrap();
+                Literal::character(ch)
+            }
+        }
     }
 }
