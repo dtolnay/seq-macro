@@ -176,7 +176,7 @@ pub(crate) fn validate_range(
             Radix::Binary => "binary",
             Radix::Octal => "octal",
             Radix::Decimal => "base 10",
-            Radix::Hex => "hexadecimal",
+            Radix::LowerHex | Radix::UpperHex => "hexadecimal",
         };
         return Err(SyntaxError {
             message: format!("expected {} literal", expected),
@@ -227,7 +227,9 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
     } else if repr.starts_with("0o") {
         (Radix::Octal, 8)
     } else if repr.starts_with("0x") {
-        (Radix::Hex, 16)
+        (Radix::LowerHex, 16)
+    } else if repr.starts_with("0X") {
+        (Radix::UpperHex, 16)
     } else {
         (Radix::Decimal, 10)
     };
