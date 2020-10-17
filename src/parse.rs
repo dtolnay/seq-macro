@@ -194,6 +194,16 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
         });
     }
 
+    if repr.starts_with('\'') && repr.ends_with('\'') && repr.chars().count() == 3 {
+        return Some(Value {
+            int: repr[1..].chars().next().unwrap() as u64,
+            kind: Kind::Char,
+            suffix: String::new(),
+            width: 0,
+            span,
+        });
+    }
+
     let mut digits = String::new();
     let mut suffix = String::new();
 
