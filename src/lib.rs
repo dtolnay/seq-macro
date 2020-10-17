@@ -79,12 +79,14 @@ struct Range {
     begin: u64,
     end: u64,
     inclusive: bool,
+    kind: Kind,
     suffix: String,
     width: usize,
 }
 
 struct Value {
     int: u64,
+    kind: Kind,
     suffix: String,
     width: usize,
     span: Span,
@@ -92,8 +94,16 @@ struct Value {
 
 struct Splice<'a> {
     int: u64,
+    kind: Kind,
     suffix: &'a str,
     width: usize,
+}
+
+#[derive(Copy, Clone)]
+enum Kind {
+    Int,
+    Byte,
+    Char,
 }
 
 impl<'a> IntoIterator for &'a Range {
@@ -101,9 +111,12 @@ impl<'a> IntoIterator for &'a Range {
     type IntoIter = Box<dyn Iterator<Item = Splice<'a>> + 'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let suffix = &self.suffix;
-        let width = self.width;
-        let splice = move |int| Splice { int, suffix, width };
+        let splice = move |int| Splice {
+            int,
+            kind: self.kind,
+            suffix: &self.suffix,
+            width: self.width,
+        };
         if self.inclusive {
             Box::new((self.begin..=self.end).map(splice))
         } else {

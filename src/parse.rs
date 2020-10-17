@@ -1,4 +1,4 @@
-use crate::{Range, Value};
+use crate::{Kind, Range, Value};
 use proc_macro::token_stream::IntoIter as TokenIter;
 use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::borrow::Borrow;
@@ -158,6 +158,7 @@ pub(crate) fn validate_range(
         begin: begin.int,
         end: end.int,
         inclusive,
+        kind: begin.kind,
         suffix,
         width: cmp::min(begin.width, end.width),
     })
@@ -186,10 +187,12 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
     }
 
     let int = digits.parse::<u64>().ok()?;
+    let kind = Kind::Int;
     let width = digits.len();
     let span = lit.span();
     Some(Value {
         int,
+        kind,
         suffix,
         width,
         span,
