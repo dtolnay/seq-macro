@@ -207,7 +207,13 @@ fn substitute_value(var: &Ident, splice: &Splice, body: TokenStream) -> TokenStr
             };
             if let Some(prefix) = prefix {
                 let number = match splice.kind {
-                    Kind::Int => format!("{0:01$}", splice.int, splice.width),
+                    Kind::Int => match splice.radix {
+                        2 => format!("{0:01$b}", splice.int, splice.width),
+                        8 => format!("{0:01$o}", splice.int, splice.width),
+                        10 => format!("{0:01$}", splice.int, splice.width),
+                        16 => format!("{0:01$x}", splice.int, splice.width),
+                        _ => unreachable!(),
+                    },
                     Kind::Byte | Kind::Char => {
                         char::from_u32(splice.int as u32).unwrap().to_string()
                     }
