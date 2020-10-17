@@ -132,6 +132,19 @@ fn test_radix_concat() {
     let _ = (S011, S100, S007, S010, S00a, S00b, S00C, S00D);
 }
 
+#[test]
+fn test_ident() {
+    macro_rules! create {
+        ($prefix:ident) => {
+            seq!(N in 0..1 {
+                struct $prefix#N;
+            });
+        };
+    }
+    create!(Pin);
+    let _ = Pin0;
+}
+
 pub mod test_enum {
     use seq_macro::seq;
 
