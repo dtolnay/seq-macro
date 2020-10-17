@@ -83,6 +83,7 @@ struct Range {
     kind: Kind,
     suffix: String,
     width: usize,
+    radix: Radix,
 }
 
 struct Value {
@@ -90,6 +91,7 @@ struct Value {
     kind: Kind,
     suffix: String,
     width: usize,
+    radix: Radix,
     span: Span,
 }
 
@@ -98,6 +100,7 @@ struct Splice<'a> {
     kind: Kind,
     suffix: &'a str,
     width: usize,
+    radix: Radix,
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -105,6 +108,15 @@ enum Kind {
     Int,
     Byte,
     Char,
+}
+
+#[derive(Copy, Clone, PartialEq)]
+enum Radix {
+    Binary,
+    Octal,
+    Decimal,
+    LowerHex,
+    UpperHex,
 }
 
 impl<'a> IntoIterator for &'a Range {
@@ -117,6 +129,7 @@ impl<'a> IntoIterator for &'a Range {
             kind: self.kind,
             suffix: &self.suffix,
             width: self.width,
+            radix: self.radix,
         };
         match self.kind {
             Kind::Int | Kind::Byte => {
@@ -203,7 +216,13 @@ fn substitute_value(var: &Ident, splice: &Splice, body: TokenStream) -> TokenStr
             };
             if let Some(prefix) = prefix {
                 let number = match splice.kind {
-                    Kind::Int => format!("{0:01$}", splice.int, splice.width),
+                    Kind::Int => match splice.radix {
+                        Radix::Binary => format!("{0:01$b}", splice.int, splice.width),
+                        Radix::Octal => format!("{0:01$o}", splice.int, splice.width),
+                        Radix::Decimal => format!("{0:01$}", splice.int, splice.width),
+                        Radix::LowerHex => format!("{0:01$x}", splice.int, splice.width),
+                        Radix::UpperHex => format!("{0:01$X}", splice.int, splice.width),
+                    },
                     Kind::Byte | Kind::Char => {
                         char::from_u32(splice.int as u32).unwrap().to_string()
                     }
@@ -295,7 +314,13 @@ impl Splice<'_> {
     fn literal(&self) -> Literal {
         match self.kind {
             Kind::Int | Kind::Byte => {
-                let repr = format!("{0:02$}{1}", self.int, self.suffix, self.width);
+                let repr = match self.radix {
+                    Radix::Binary => format!("0b{0:02$b}{1}", self.int, self.suffix, self.width),
+                    Radix::Octal => format!("0o{0:02$o}{1}", self.int, self.suffix, self.width),
+                    Radix::Decimal => format!("{0:02$}{1}", self.int, self.suffix, self.width),
+                    Radix::LowerHex => format!("0x{0:02$x}{1}", self.int, self.suffix, self.width),
+                    Radix::UpperHex => format!("0x{0:02$X}{1}", self.int, self.suffix, self.width),
+                };
                 let tokens = repr.parse::<TokenStream>().unwrap();
                 let mut iter = tokens.into_iter();
                 let literal = match iter.next() {

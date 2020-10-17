@@ -94,6 +94,44 @@ fn test_char() {
     assert_eq!(chars, ['x', 'y', 'z']);
 }
 
+#[test]
+fn test_binary() {
+    let s = seq!(B in 0b00..=0b11 { stringify!(#(B)*) });
+    let expected = "0b00 0b01 0b10 0b11";
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn test_octal() {
+    let s = seq!(O in 0o6..0o12 { stringify!(#(O)*) });
+    let expected = "0o6 0o7 0o10 0o11";
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn test_hex() {
+    let s = seq!(X in 0x08..0x0c { stringify!(#(X)*) });
+    let expected = "0x08 0x09 0x0a 0x0b";
+    assert_eq!(expected, s);
+
+    let s = seq!(X in 0x08..0x0C { stringify!(#(X)*) });
+    let expected = "0x08 0x09 0x0A 0x0B";
+    assert_eq!(expected, s);
+
+    let s = seq!(X in 0X09..0X10 { stringify!(#(X)*) });
+    let expected = "0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F";
+    assert_eq!(expected, s);
+}
+
+#[test]
+fn test_radix_concat() {
+    seq!(B in 0b011..0b101 { struct S#B; });
+    seq!(O in 0o007..0o011 { struct S#O; });
+    seq!(X in 0x00a..0x00c { struct S#X; });
+    seq!(X in 0x00C..0x00E { struct S#X; });
+    let _ = (S011, S100, S007, S010, S00a, S00b, S00C, S00D);
+}
+
 pub mod test_enum {
     use seq_macro::seq;
 

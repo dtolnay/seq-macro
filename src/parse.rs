@@ -1,4 +1,4 @@
-use crate::{Kind, Range, Value};
+use crate::{Kind, Radix, Range, Value};
 use proc_macro::token_stream::IntoIter as TokenIter;
 use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::borrow::Borrow;
@@ -169,6 +169,25 @@ pub(crate) fn validate_range(
         });
     };
 
+    let radix = if begin.radix == end.radix {
+        begin.radix
+    } else if begin.radix == Radix::LowerHex && end.radix == Radix::UpperHex
+        || begin.radix == Radix::UpperHex && end.radix == Radix::LowerHex
+    {
+        Radix::UpperHex
+    } else {
+        let expected = match begin.radix {
+            Radix::Binary => "binary",
+            Radix::Octal => "octal",
+            Radix::Decimal => "base 10",
+            Radix::LowerHex | Radix::UpperHex => "hexadecimal",
+        };
+        return Err(SyntaxError {
+            message: format!("expected {} literal", expected),
+            span: end.span,
+        });
+    };
+
     Ok(Range {
         begin: begin.int,
         end: end.int,
@@ -176,6 +195,7 @@ pub(crate) fn validate_range(
         kind,
         suffix,
         width: cmp::min(begin.width, end.width),
+        radix,
     })
 }
 
@@ -190,6 +210,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
             kind: Kind::Byte,
             suffix: String::new(),
             width: 0,
+            radix: Radix::Decimal,
             span,
         });
     }
@@ -200,17 +221,40 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
             kind: Kind::Char,
             suffix: String::new(),
             width: 0,
+            radix: Radix::Decimal,
             span,
         });
     }
 
+    let (mut radix, radix_n) = if repr.starts_with("0b") {
+        (Radix::Binary, 2)
+    } else if repr.starts_with("0o") {
+        (Radix::Octal, 8)
+    } else if repr.starts_with("0x") {
+        (Radix::LowerHex, 16)
+    } else if repr.starts_with("0X") {
+        (Radix::UpperHex, 16)
+    } else {
+        (Radix::Decimal, 10)
+    };
+
+    let mut iter = repr.char_indices();
     let mut digits = String::new();
     let mut suffix = String::new();
 
-    for (i, ch) in repr.char_indices() {
+    if radix != Radix::Decimal {
+        let _ = iter.nth(1);
+    }
+
+    for (i, ch) in iter {
         match ch {
             '_' => continue,
             '0'..='9' => digits.push(ch),
+            'A'..='F' if radix == Radix::LowerHex => {
+                digits.push(ch);
+                radix = Radix::UpperHex;
+            }
+            'a'..='f' | 'A'..='F' if radix_n == 16 => digits.push(ch),
             '.' => return None,
             _ => {
                 if digits.is_empty() {
@@ -223,7 +267,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
         }
     }
 
-    let int = digits.parse::<u64>().ok()?;
+    let int = u64::from_str_radix(&digits, radix_n).ok()?;
     let kind = Kind::Int;
     let width = digits.len();
     Some(Value {
@@ -231,6 +275,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
         kind,
         suffix,
         width,
+        radix,
         span,
     })
 }
