@@ -65,6 +65,7 @@ mod parse;
 
 use crate::parse::*;
 use proc_macro::{Delimiter, Group, Ident, Literal, Span, TokenStream, TokenTree};
+use std::char;
 use std::iter::{self, FromIterator};
 
 #[proc_macro]
@@ -272,14 +273,22 @@ fn expand_repetitions(
 
 impl Splice<'_> {
     fn literal(&self) -> Literal {
-        let repr = format!("{0:02$}{1}", self.int, self.suffix, self.width);
-        let tokens = repr.parse::<TokenStream>().unwrap();
-        let mut iter = tokens.into_iter();
-        let literal = match iter.next() {
-            Some(TokenTree::Literal(literal)) => literal,
-            _ => unreachable!(),
-        };
-        assert!(iter.next().is_none());
-        literal
+        match self.kind {
+            Kind::Int | Kind::Byte => {
+                let repr = format!("{0:02$}{1}", self.int, self.suffix, self.width);
+                let tokens = repr.parse::<TokenStream>().unwrap();
+                let mut iter = tokens.into_iter();
+                let literal = match iter.next() {
+                    Some(TokenTree::Literal(literal)) => literal,
+                    _ => unreachable!(),
+                };
+                assert!(iter.next().is_none());
+                literal
+            }
+            Kind::Char => {
+                let ch = char::from_u32(self.int as u32).unwrap();
+                Literal::character(ch)
+            }
+        }
     }
 }
