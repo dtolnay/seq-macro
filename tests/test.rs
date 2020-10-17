@@ -72,6 +72,28 @@ fn test_padding() {
     assert_eq!(strings, ["098", "099", "100"]);
 }
 
+#[test]
+fn test_byte() {
+    seq!(c in b'x'..=b'z' {
+        fn get_#c() -> u8 {
+            c
+        }
+    });
+    let bytes = [get_x(), get_y(), get_z()];
+    assert_eq!(bytes, *b"xyz");
+}
+
+#[test]
+fn test_char() {
+    seq!(ch in 'x'..='z' {
+        fn get_#ch() -> char {
+            ch
+        }
+    });
+    let chars = [get_x(), get_y(), get_z()];
+    assert_eq!(chars, ['x', 'y', 'z']);
+}
+
 pub mod test_enum {
     use seq_macro::seq;
 
