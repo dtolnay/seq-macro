@@ -118,10 +118,24 @@ impl<'a> IntoIterator for &'a Range {
             suffix: &self.suffix,
             width: self.width,
         };
-        if self.inclusive {
-            Box::new((self.begin..=self.end).map(splice))
-        } else {
-            Box::new((self.begin..self.end).map(splice))
+        match self.kind {
+            Kind::Int | Kind::Byte => {
+                if self.inclusive {
+                    Box::new((self.begin..=self.end).map(splice))
+                } else {
+                    Box::new((self.begin..self.end).map(splice))
+                }
+            }
+            Kind::Char => {
+                let begin = char::from_u32(self.begin as u32).unwrap();
+                let end = char::from_u32(self.end as u32).unwrap();
+                let int = |ch| u64::from(u32::from(ch));
+                if self.inclusive {
+                    Box::new((begin..=end).map(int).map(splice))
+                } else {
+                    Box::new((begin..end).map(int).map(splice))
+                }
+            }
         }
     }
 }
