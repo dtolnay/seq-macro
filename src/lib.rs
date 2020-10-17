@@ -103,10 +103,11 @@ impl<'a> IntoIterator for &'a Range {
     fn into_iter(self) -> Self::IntoIter {
         let suffix = &self.suffix;
         let width = self.width;
+        let splice = move |int| Splice { int, suffix, width };
         if self.inclusive {
-            Box::new((self.begin..=self.end).map(move |int| Splice { int, suffix, width }))
+            Box::new((self.begin..=self.end).map(splice))
         } else {
-            Box::new((self.begin..self.end).map(move |int| Splice { int, suffix, width }))
+            Box::new((self.begin..self.end).map(splice))
         }
     }
 }
