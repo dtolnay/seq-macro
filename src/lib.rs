@@ -73,7 +73,13 @@
 //! });
 //! ```
 
-#![allow(clippy::needless_doctest_main)]
+#![allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::needless_doctest_main,
+    clippy::single_match_else,
+    clippy::wildcard_imports
+)]
 
 mod parse;
 
