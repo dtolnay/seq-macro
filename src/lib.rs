@@ -73,6 +73,8 @@
 //! });
 //! ```
 
+#![allow(clippy::needless_doctest_main)]
+
 mod parse;
 
 use crate::parse::*;
