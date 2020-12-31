@@ -1,3 +1,5 @@
+#![allow(clippy::identity_op, clippy::shadow_unrelated)]
+
 use seq_macro::seq;
 
 seq!(N in 0..8 {
