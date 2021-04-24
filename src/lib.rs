@@ -48,7 +48,7 @@
 //!     #[derive(Debug)]
 //!     enum Demo {
 //!         // Expands to Variant64, Variant65, ...
-//!         #(
+//!         ##(
 //!             Variant#N,
 //!         )*
 //!     }
