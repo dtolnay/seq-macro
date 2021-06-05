@@ -200,7 +200,7 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
 fn repeat(var: &Ident, range: &Range, body: &TokenStream) -> TokenStream {
     let mut repeated = TokenStream::new();
     for value in range {
-        repeated.extend(substitute_value(&var, &value, body.clone()));
+        repeated.extend(substitute_value(var, &value, body.clone()));
     }
     repeated
 }
