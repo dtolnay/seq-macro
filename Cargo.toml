@@ -8,6 +8,7 @@ repository = "https://github.com/dtolnay/seq-macro"
 documentation = "https://docs.rs/seq-macro"
 readme = "README.md"
 edition = "2018"
+rust-version = "1.45"
 
 [lib]
 proc-macro = true
