@@ -1,23 +1,23 @@
 error: error number 0
- --> $DIR/tests/ui/compile-error-span.rs:4:5
+ --> tests/ui/compile-error-span.rs:4:5
   |
 4 |     compile_error!(concat!("error number ", stringify!(N)));
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: error number 1
- --> $DIR/tests/ui/compile-error-span.rs:4:5
+ --> tests/ui/compile-error-span.rs:4:5
   |
 4 |     compile_error!(concat!("error number ", stringify!(N)));
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: error number 2
- --> $DIR/tests/ui/compile-error-span.rs:4:5
+ --> tests/ui/compile-error-span.rs:4:5
   |
 4 |     compile_error!(concat!("error number ", stringify!(N)));
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: error number 3
- --> $DIR/tests/ui/compile-error-span.rs:4:5
+ --> tests/ui/compile-error-span.rs:4:5
   |
 4 |     compile_error!(concat!("error number ", stringify!(N)));
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
