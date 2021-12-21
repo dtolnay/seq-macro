@@ -54,7 +54,7 @@ seq!(N in 64..=127 {
     enum Demo {
         // Expands to Variant64, Variant65, ...
         #(
-            Variant#N,
+            Variant~N,
         )*
     }
 });
@@ -74,7 +74,7 @@ use seq_macro::seq;
 
 seq!(P in 0x000..=0x00F {
     // expands to structs Pin000, ..., Pin009, Pin00A, ..., Pin00F
-    struct Pin#P;
+    struct Pin~P;
 });
 ```
 

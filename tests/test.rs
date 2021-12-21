@@ -22,7 +22,7 @@ fn test_nothing() {
 #[test]
 fn test_fn() {
     seq!(N in 1..4 {
-        fn f#N () -> u64 {
+        fn f~N () -> u64 {
             N * 2
         }
     });
@@ -66,7 +66,7 @@ fn test_suffixed() {
 #[test]
 fn test_padding() {
     seq!(N in 098..=100 {
-        fn e#N() -> &'static str {
+        fn e~N() -> &'static str {
             stringify!(N)
         }
     });
@@ -77,7 +77,7 @@ fn test_padding() {
 #[test]
 fn test_byte() {
     seq!(c in b'x'..=b'z' {
-        fn get_#c() -> u8 {
+        fn get_~c() -> u8 {
             c
         }
     });
@@ -88,7 +88,7 @@ fn test_byte() {
 #[test]
 fn test_char() {
     seq!(ch in 'x'..='z' {
-        fn get_#ch() -> char {
+        fn get_~ch() -> char {
             ch
         }
     });
@@ -127,10 +127,10 @@ fn test_hex() {
 
 #[test]
 fn test_radix_concat() {
-    seq!(B in 0b011..0b101 { struct S#B; });
-    seq!(O in 0o007..0o011 { struct S#O; });
-    seq!(X in 0x00a..0x00c { struct S#X; });
-    seq!(X in 0x00C..0x00E { struct S#X; });
+    seq!(B in 0b011..0b101 { struct S~B; });
+    seq!(O in 0o007..0o011 { struct S~O; });
+    seq!(X in 0x00a..0x00c { struct S~X; });
+    seq!(X in 0x00C..0x00E { struct S~X; });
     let _ = (S011, S100, S007, S010, S00a, S00b, S00C, S00D);
 }
 
@@ -139,7 +139,7 @@ fn test_ident() {
     macro_rules! create {
         ($prefix:ident) => {
             seq!(N in 0..1 {
-                struct $prefix#N;
+                struct $prefix~N;
             });
         };
     }
@@ -154,7 +154,7 @@ pub mod test_enum {
         #[derive(Copy, Clone, PartialEq, Debug)]
         pub enum Interrupt {
             #(
-                Irq#N,
+                Irq~N,
             )*
         }
     });
@@ -173,7 +173,7 @@ pub mod test_inclusive {
     seq!(N in 16..=20 {
         pub enum E {
             #(
-                Variant#N,
+                Variant~N,
             )*
         }
     });

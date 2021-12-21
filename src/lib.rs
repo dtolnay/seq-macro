@@ -49,7 +49,7 @@
 //!     enum Demo {
 //!         // Expands to Variant64, Variant65, ...
 //!         ##(
-//!             Variant#N,
+//!             Variant~N,
 //!         )*
 //!     }
 //! });
@@ -69,7 +69,7 @@
 //!
 //! seq!(P in 0x000..=0x00F {
 //!     // expands to structs Pin000, ..., Pin009, Pin00A, ..., Pin00F
-//!     struct Pin#P;
+//!     struct Pin~P;
 //! });
 //! ```
 
@@ -224,11 +224,11 @@ fn substitute_value(var: &Ident, splice: &Splice, body: TokenStream) -> TokenStr
             continue;
         }
 
-        // Substitute our variable concatenated onto some prefix, `Prefix#N`.
+        // Substitute our variable concatenated onto some prefix, `Prefix~N`.
         if i + 3 <= tokens.len() {
             let prefix = match &tokens[i..i + 3] {
-                [first, TokenTree::Punct(pound), TokenTree::Ident(ident)]
-                    if pound.as_char() == '#' && ident.to_string() == var.to_string() =>
+                [first, TokenTree::Punct(tilde), TokenTree::Ident(ident)]
+                    if tilde.as_char() == '~' && ident.to_string() == var.to_string() =>
                 {
                     match first {
                         TokenTree::Ident(ident) => Some(ident.clone()),
