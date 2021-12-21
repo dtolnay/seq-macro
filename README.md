@@ -11,7 +11,7 @@ repetition a sequential numeric counter.
 
 ```toml
 [dependencies]
-seq-macro = "0.2"
+seq-macro = "0.3"
 ```
 
 ```rust
