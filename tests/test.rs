@@ -259,3 +259,25 @@ pub mod test_group {
 
     pub static PROCS: Mutex<[Proc; NPROC]> = Mutex::new("procs", pass_nproc!(make_procs_array));
 }
+
+#[test]
+fn test_nested() {
+    let mut vec = Vec::new();
+    macro_rules! some_macro {
+        ($($t:ident,)*) => {
+            vec.push(stringify!($($t)*));
+        };
+    }
+
+    seq!(I in 1..=3 {
+        #(
+            seq!(J in 1..=I {
+                some_macro!(
+                    #(T~J,)*
+                );
+            });
+        )*
+    });
+
+    assert_eq!(vec, ["T1", "T1 T2", "T1 T2 T3"]);
+}
