@@ -1,4 +1,8 @@
-#![allow(clippy::identity_op, clippy::shadow_unrelated)]
+#![allow(
+    clippy::derive_partial_eq_without_eq,
+    clippy::identity_op,
+    clippy::shadow_unrelated
+)]
 
 use seq_macro::seq;
 
