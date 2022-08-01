@@ -2,6 +2,7 @@
 name = "seq-macro"
 version = "0.3.0"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
+categories = ["development-tools", "no-std"]
 description = "Macro to repeat sequentially indexed copies of a fragment of code."
 documentation = "https://docs.rs/seq-macro"
 edition = "2018"
