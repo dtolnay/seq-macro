@@ -4,7 +4,7 @@
 [<img alt="github" src="https://img.shields.io/badge/github-dtolnay/seq--macro-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/dtolnay/seq-macro)
 [<img alt="crates.io" src="https://img.shields.io/crates/v/seq-macro.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/seq-macro)
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-seq--macro-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/seq-macro)
-[<img alt="build status" src="https://img.shields.io/github/workflow/status/dtolnay/seq-macro/CI/master?style=for-the-badge" height="20">](https://github.com/dtolnay/seq-macro/actions?query=branch%3Amaster)
+[<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/dtolnay/seq-macro/ci.yml?branch=master&style=for-the-badge" height="20">](https://github.com/dtolnay/seq-macro/actions?query=branch%3Amaster)
 
 A `seq!` macro to repeat a fragment of source code and substitute into each
 repetition a sequential numeric counter.
