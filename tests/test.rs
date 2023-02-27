@@ -1,6 +1,7 @@
 #![allow(
     clippy::derive_partial_eq_without_eq,
     clippy::identity_op,
+    clippy::let_underscore_untyped,
     clippy::shadow_unrelated
 )]
 

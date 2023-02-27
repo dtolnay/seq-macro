@@ -77,6 +77,7 @@
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
     clippy::derive_partial_eq_without_eq,
+    clippy::let_underscore_untyped,
     clippy::needless_doctest_main,
     clippy::single_match_else,
     clippy::wildcard_imports
