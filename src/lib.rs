@@ -73,6 +73,7 @@
 //! });
 //! ```
 
+#![doc(html_root_url = "https://docs.rs/seq-macro/0.3.2")]
 #![allow(
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
