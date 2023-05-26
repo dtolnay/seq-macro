@@ -113,10 +113,6 @@ pub(crate) fn require_if_punct(iter: &mut TokenIter, ch: char) -> Result<bool, S
 }
 
 pub(crate) fn require_range(iter: &mut TokenIter) -> Result<Range,SyntaxError>  {
-    let begin;
-    let end;
-    let inclusive;
-    let reverse ;
     let range_iter;
     let mut range_token_stream_iter;
     if let Some(TokenTree::Group(_)) = iter.clone().next() {
@@ -126,17 +122,16 @@ pub(crate) fn require_range(iter: &mut TokenIter) -> Result<Range,SyntaxError>  
     } else {
         range_iter = iter;
     }
-    begin = require_value(range_iter)?;
+    let begin = require_value(range_iter)?;
     require_punct(range_iter, '.')?;
     require_punct(range_iter, '.')?;
-    inclusive = require_if_punct(range_iter, '=')?;
-    end = require_value(range_iter)?;
+    let inclusive = require_if_punct(range_iter, '=')?;
+    let end = require_value(range_iter)?;
+    let mut reverse  = false;
     if require_if_punct(iter, '.')? {
         require_keyword(iter, "rev")?;
         next_token(iter)?; // Skipping parentheses.
         reverse = true;
-    } else {
-        reverse = false;
     }
     validate_range(begin, end, inclusive, reverse)
 }

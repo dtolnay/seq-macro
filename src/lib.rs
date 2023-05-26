@@ -163,12 +163,10 @@ impl<'a> IntoIterator for &'a Range {
                     } else {
                         Box::new((self.begin..=self.end).map(splice))
                     }
+                } else if self.reverse {
+                    Box::new((self.begin..self.end).rev().map(splice))
                 } else {
-                    if self.reverse {
-                        Box::new((self.begin..self.end).rev().map(splice))
-                    } else {
-                        Box::new((self.begin..self.end).map(splice))
-                    }
+                    Box::new((self.begin..self.end).map(splice))
                 }
             }
             Kind::Char => {
@@ -181,12 +179,10 @@ impl<'a> IntoIterator for &'a Range {
                     } else {
                         Box::new((begin..=end).map(int).map(splice))
                     }
+                } else if self.reverse {
+                    Box::new((begin..end).rev().map(int).map(splice))
                 } else {
-                    if self.reverse {
-                        Box::new((begin..end).rev().map(int).map(splice))
-                    } else {
-                        Box::new((begin..end).map(int).map(splice))
-                    }
+                    Box::new((begin..end).map(int).map(splice))
                 }
             }
         }
