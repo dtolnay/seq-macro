@@ -37,6 +37,13 @@ fn main() {
     });
 
     assert_eq!(sum, 1110);
+  
+    // Reverse order is allowed to.
+    let mut values = Vec::with_capacity(3);
+    seq!(N in (0..=2).rev() {
+        values.push(tuple.N);
+    });
+    assert_eq!(values, [10, 100, 1000]);
 }
 ```
 
