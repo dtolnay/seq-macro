@@ -116,9 +116,12 @@ pub(crate) fn require_range(iter: &mut TokenIter) -> Result<Range,SyntaxError>  
     let range_iter;
     let mut range_token_stream_iter;
     if let Some(TokenTree::Group(_)) = iter.clone().next() {
-        let TokenTree::Group(group) = next_token(iter)? else { unreachable!() };
-        range_token_stream_iter = group.stream().into_iter();
-        range_iter = &mut range_token_stream_iter;
+        if let TokenTree::Group(group) = next_token(iter)? {
+            range_token_stream_iter = group.stream().into_iter();
+            range_iter = &mut range_token_stream_iter;
+        } else {
+            unreachable!();
+        }
     } else {
         range_iter = iter;
     }
