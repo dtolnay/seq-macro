@@ -1,6 +1,6 @@
 [package]
 name = "seq-macro"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 categories = ["development-tools", "no-std", "no-std::no-alloc"]
 description = "Macro to repeat sequentially indexed copies of a fragment of code."
