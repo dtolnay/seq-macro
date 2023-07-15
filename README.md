@@ -15,8 +15,6 @@ seq-macro = "0.3"
 ```
 
 ```rust
-#![feature(proc_macro_hygiene)]
-
 use seq_macro::seq;
 
 fn main() {
