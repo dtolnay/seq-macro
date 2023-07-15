@@ -15,7 +15,7 @@ seq-macro = "0.3"
 ```
 
 ```rust
-#![feature(proc_macro_non_items)]
+#![feature(proc_macro_hygiene)]
 
 use seq_macro::seq;
 
