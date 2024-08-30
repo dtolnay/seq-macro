@@ -108,6 +108,7 @@ struct Range {
     suffix: String,
     width: usize,
     radix: Radix,
+    reverse: bool,
 }
 
 struct Value {
@@ -158,7 +159,13 @@ impl<'a> IntoIterator for &'a Range {
         match self.kind {
             Kind::Int | Kind::Byte => {
                 if self.inclusive {
-                    Box::new((self.begin..=self.end).map(splice))
+                    if self.reverse {
+                        Box::new((self.begin..=self.end).rev().map(splice))
+                    } else {
+                        Box::new((self.begin..=self.end).map(splice))
+                    }
+                } else if self.reverse {
+                    Box::new((self.begin..self.end).rev().map(splice))
                 } else {
                     Box::new((self.begin..self.end).map(splice))
                 }
@@ -168,7 +175,13 @@ impl<'a> IntoIterator for &'a Range {
                 let end = char::from_u32(self.end as u32).unwrap();
                 let int = |ch| u64::from(u32::from(ch));
                 if self.inclusive {
-                    Box::new((begin..=end).map(int).map(splice))
+                    if self.reverse {
+                        Box::new((begin..=end).rev().map(int).map(splice))
+                    } else {
+                        Box::new((begin..=end).map(int).map(splice))
+                    }
+                } else if self.reverse {
+                    Box::new((begin..end).rev().map(int).map(splice))
                 } else {
                     Box::new((begin..end).map(int).map(splice))
                 }
@@ -181,15 +194,9 @@ fn seq_impl(input: TokenStream) -> Result<TokenStream, SyntaxError> {
     let mut iter = input.into_iter();
     let var = require_ident(&mut iter)?;
     require_keyword(&mut iter, "in")?;
-    let begin = require_value(&mut iter)?;
-    require_punct(&mut iter, '.')?;
-    require_punct(&mut iter, '.')?;
-    let inclusive = require_if_punct(&mut iter, '=')?;
-    let end = require_value(&mut iter)?;
+    let range = require_range(&mut iter)?;
     let body = require_braces(&mut iter)?;
     require_end(&mut iter)?;
-
-    let range = validate_range(begin, end, inclusive)?;
 
     let mut found_repetition = false;
     let expanded = expand_repetitions(&var, &range, body.clone(), &mut found_repetition);
