@@ -45,6 +45,24 @@ fn test_fn() {
 }
 
 #[test]
+fn test_reverse() {
+    let mut values = Vec::with_capacity(4);
+    seq!(N in (0..4).rev() {
+        values.push(N);
+    });
+    assert_eq!(values, [3, 2, 1, 0]);
+}
+
+#[test]
+fn test_reverse_inclusive() {
+    let mut values = Vec::with_capacity(4);
+    seq!(N in (0..=3).rev() {
+        values.push(N);
+    });
+    assert_eq!(values, [3, 2, 1, 0]);
+}
+
+#[test]
 fn test_stringify() {
     let strings = seq!(N in 9..12 {
         [
