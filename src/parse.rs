@@ -248,7 +248,7 @@ fn parse_literal(lit: &Literal) -> Option<Value> {
 
     for (i, ch) in iter {
         match ch {
-            '_' => continue,
+            '_' => {}
             '0'..='9' => digits.push(ch),
             'A'..='F' if radix == Radix::LowerHex => {
                 digits.push(ch);
