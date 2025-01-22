@@ -112,6 +112,33 @@ pub(crate) fn require_if_punct(iter: &mut TokenIter, ch: char) -> Result<bool, S
     Ok(present)
 }
 
+pub(crate) fn require_range(iter: &mut TokenIter) -> Result<Range,SyntaxError>  {
+    let range_iter;
+    let mut range_token_stream_iter;
+    if let Some(TokenTree::Group(_)) = iter.clone().next() {
+        if let TokenTree::Group(group) = next_token(iter)? {
+            range_token_stream_iter = group.stream().into_iter();
+            range_iter = &mut range_token_stream_iter;
+        } else {
+            unreachable!();
+        }
+    } else {
+        range_iter = iter;
+    }
+    let begin = require_value(range_iter)?;
+    require_punct(range_iter, '.')?;
+    require_punct(range_iter, '.')?;
+    let inclusive = require_if_punct(range_iter, '=')?;
+    let end = require_value(range_iter)?;
+    let mut reverse  = false;
+    if require_if_punct(iter, '.')? {
+        require_keyword(iter, "rev")?;
+        next_token(iter)?; // Skipping parentheses.
+        reverse = true;
+    }
+    validate_range(begin, end, inclusive, reverse)
+}
+
 pub(crate) fn require_punct(iter: &mut TokenIter, ch: char) -> Result<(), SyntaxError> {
     let token = next_token(iter)?;
     if let TokenTree::Punct(punct) = &token {
@@ -143,6 +170,7 @@ pub(crate) fn validate_range(
     begin: Value,
     end: Value,
     inclusive: bool,
+    reverse: bool,
 ) -> Result<Range, SyntaxError> {
     let kind = if begin.kind == end.kind {
         begin.kind
@@ -196,6 +224,7 @@ pub(crate) fn validate_range(
         suffix,
         width: cmp::min(begin.width, end.width),
         radix,
+        reverse,
     })
 }
 
