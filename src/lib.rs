@@ -82,6 +82,7 @@
     clippy::let_underscore_untyped,
     clippy::needless_doctest_main,
     clippy::single_match_else,
+    clippy::uninlined_format_args,
     clippy::wildcard_imports
 )]
 
