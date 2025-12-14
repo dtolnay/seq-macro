@@ -325,12 +325,9 @@ fn expand_repetitions(
             i += 1;
             continue;
         }
-        let template = match enter_repetition(&tokens[i..i + 3]) {
-            Some(template) => template,
-            None => {
-                i += 1;
-                continue;
-            }
+        let Some(template) = enter_repetition(&tokens[i..i + 3]) else {
+            i += 1;
+            continue;
         };
         *found_repetition = true;
         let mut repeated = Vec::new();
@@ -358,9 +355,8 @@ impl Splice<'_> {
                 };
                 let tokens = repr.parse::<TokenStream>().unwrap();
                 let mut iter = tokens.into_iter();
-                let literal = match iter.next() {
-                    Some(TokenTree::Literal(literal)) => literal,
-                    _ => unreachable!(),
+                let Some(TokenTree::Literal(literal)) = iter.next() else {
+                    unreachable!();
                 };
                 assert!(iter.next().is_none());
                 literal

@@ -79,9 +79,8 @@ pub(crate) fn require_value(iter: &mut TokenIter) -> Result<Value, SyntaxError> 
                 if delimiter != Delimiter::None {
                     break;
                 }
-                let first = match stream.next() {
-                    Some(first) => first,
-                    None => break,
+                let Some(first) = stream.next() else {
+                    break;
                 };
                 match stream.next() {
                     Some(_) => break,
