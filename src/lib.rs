@@ -91,7 +91,7 @@ mod parse;
 use crate::parse::*;
 use proc_macro::{Delimiter, Group, Ident, Literal, Span, TokenStream, TokenTree};
 use std::char;
-use std::iter::{self, FromIterator};
+use std::iter;
 
 #[proc_macro]
 pub fn seq(input: TokenStream) -> TokenStream {

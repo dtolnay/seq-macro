@@ -4,7 +4,6 @@ use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenSt
 use std::borrow::Borrow;
 use std::cmp;
 use std::fmt::Display;
-use std::iter::FromIterator;
 
 pub(crate) struct SyntaxError {
     message: String,
