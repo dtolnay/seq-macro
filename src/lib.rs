@@ -285,7 +285,7 @@ fn substitute_value(var: &Ident, splice: &Splice, body: TokenStream) -> TokenStr
 }
 
 fn enter_repetition(tokens: &[TokenTree]) -> Option<TokenStream> {
-    assert!(tokens.len() == 3);
+    assert_eq!(tokens.len(), 3);
     match &tokens[0] {
         TokenTree::Punct(punct) if punct.as_char() == '#' => {}
         _ => return None,
