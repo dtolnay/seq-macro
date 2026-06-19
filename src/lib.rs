@@ -90,15 +90,11 @@ mod parse;
 
 use crate::parse::*;
 use proc_macro::{Delimiter, Group, Ident, Literal, Span, TokenStream, TokenTree};
-use std::char;
 use std::iter;
 
 #[proc_macro]
 pub fn seq(input: TokenStream) -> TokenStream {
-    match seq_impl(input) {
-        Ok(expanded) => expanded,
-        Err(error) => error.into_compile_error(),
-    }
+    seq_impl(input).unwrap_or_else(|error| error.into_compile_error())
 }
 
 struct Range {
