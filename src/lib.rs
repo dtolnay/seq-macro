@@ -94,7 +94,7 @@ use std::iter;
 
 #[proc_macro]
 pub fn seq(input: TokenStream) -> TokenStream {
-    seq_impl(input).unwrap_or_else(|error| error.into_compile_error())
+    seq_impl(input).unwrap_or_else(SyntaxError::into_compile_error)
 }
 
 struct Range {
